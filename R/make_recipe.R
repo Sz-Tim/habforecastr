@@ -3,15 +3,14 @@
 #'
 #' @param train.df
 #' @param response
+#' @param covsExclude
 #' @param dimReduce
 #'
 #' @return
 #' @export
-prep_recipe <- function(train.df, response, covsExclude="NA", dimReduce=FALSE) {
+prep_recipe <- function(train.df, response, covsExclude=NULL, dimReduce=FALSE) {
   respExclude <- grep(response, c("lnN", "tl", "alert"), value=T, invert=T)
   pred_vars <- names(train.df |> select(-all_of(response)))
-  include_UVX <- !grepl("Xfetch", covsExclude)
-  include_lnNX <- !grepl("lnNWt1X", covsExclude)
   rec <- recipe(alert ~ ., train.df) |>
     update_role(all_of(pred_vars), new_role="predictor") |>
     update_role(obsid, y, date, siteid, year, new_role="ID") |>
@@ -20,19 +19,11 @@ prep_recipe <- function(train.df, response, covsExclude="NA", dimReduce=FALSE) {
     step_dummy(all_factor_predictors()) |>
     step_logit(starts_with("prAlert"), offset=0.01) |>
     step_logit(ends_with("A1"), offset=0.01) |>
-    step_interact(terms=~lon:lat, sep="X")
-  if(include_UVX) {
-    rec <- rec |>
-      step_interact(terms=~UWk:fetch:matches("Dir[EW]"), sep="X") |>
-      step_interact(terms=~VWk:fetch:matches("Dir[NS]"), sep="X") |>
-      step_interact(terms=~UWk:fetch:matches("Dir[NS]"), sep="X") |>
-      step_interact(terms=~VWk:fetch:matches("Dir[EW]"), sep="X")
-  }
-  if(include_lnNX) {
-    rec <- rec |>
-      step_interact(terms=~lnNWt1:all_predictors(), sep="X")
-  }
-  rec <- rec |>
+    step_interact(terms=~lon:lat, sep="X") |>
+    step_interact(terms=~lnNWt1:all_predictors(), sep="X") |>
+    # Wind x fetch x non-wind/non-interactions
+    step_interact(terms=~UWk:fetch:matches("^(?![UV])(?=.*Dir)(?!.*X).*", perl=T), sep="X") |>
+    step_interact(terms=~VWk:fetch:matches("^(?![UV])(?=.*Dir)(?!.*X).*", perl=T), sep="X")|>
     step_YeoJohnson(all_predictors()) |>
     step_normalize(all_predictors()) |>
     step_harmonic(yday, frequency=1, cycle_size=365, keep_original_cols=T) |>
@@ -42,10 +33,10 @@ prep_recipe <- function(train.df, response, covsExclude="NA", dimReduce=FALSE) {
     step_bs(lat, deg_free=8, keep_original_cols=T) |>
     step_bs(lonXlat, deg_free=8) |>
     step_rename_at(contains("_"), fn=~str_remove_all(.x, "_")) |>
-    step_select(-matches(covsExclude))
+    step_select(-all_of(covsExclude))
   if(dimReduce) {
     rec <- rec |>
-      step_pca(all_predictors(), threshold=0.95)
+      step_pca(all_predictors(), threshold=0.8)
   }
   rec |>
     prep(training=train.df)

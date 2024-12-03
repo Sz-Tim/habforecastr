@@ -20,17 +20,16 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, test_prop=0.75,
                        responses=c(alert="alert")) {
 
   # covariate set / response info
-  f <- covSet$f
   id <- covSet$id
   y.i <- covSet$y
   y_i.i <- y_i |> filter(abbr==y.i)
 
   # directories
   data.dir <- glue("data/{run_type}/")
-  fit.dir <- glue("out/{run_type}/model_fits/{f}/")
+  fit.dir <- glue("out/{run_type}/model_fits/{id}/")
   cv.dir <- glue("{fit.dir}/cv/")
   ens.dir <- glue("out/{run_type}/ensembles/")
-  out.dir <- glue("out/{run_type}/compiled/{f}/")
+  out.dir <- glue("out/{run_type}/compiled/{id}/")
   log.dir <- glue("out/logs/{run_type}/")
   dir.create(glue("{data.dir}/compiled/"), recursive=T, showWarnings=F)
   dir.create(ens.dir, recursive=T, showWarnings=F)
@@ -56,21 +55,26 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, test_prop=0.75,
       col_cmems, col_wrf
     ),
     interact=c(
-      paste("UWkXfetch", grep("Dir[EW]", col_cmems, value=T), sep="X"),
-      paste("VWkXfetch", grep("Dir[NS]", col_cmems, value=T), sep="X"),
-      paste("UWkXfetch", grep("Dir[NS]", col_cmems, value=T), sep="X"),
-      paste("VWkXfetch", grep("Dir[EW]", col_cmems, value=T), sep="X"),
-      paste("UWkXfetch", grep("^[Precip|Shortwave|sst].*Dir[EW]", col_wrf, value=T), sep="X"),
-      paste("VWkXfetch", grep("^[Precip|Shortwave|sst].*Dir[NS]", col_wrf, value=T), sep="X"),
-      paste("UWkXfetch", grep("^[Precip|Shortwave|sst].*Dir[NS]", col_wrf, value=T), sep="X"),
-      paste("VWkXfetch", grep("^[Precip|Shortwave|sst].*Dir[EW]", col_wrf, value=T), sep="X")
+      paste("UWkXfetch", grep("Dir", col_cmems, value=T), sep="X"),
+      paste("VWkXfetch", grep("Dir", col_cmems, value=T), sep="X"),
+      paste("UWkXfetch", grep("^[Precip|Shortwave|sst].*Dir", col_wrf, value=T), sep="X"),
+      paste("VWkXfetch", grep("^[Precip|Shortwave|sst].*Dir", col_wrf, value=T), sep="X")
     ),
     hab=c(outer(filter(y_i, type=="hab")$abbr, c("lnNAvg", "prA"), "paste0"))
   )
   all_covs$interact <- c(all_covs$interact,
                          paste("lnNWt1", c(all_covs$main[-2]), sep="X"))
-  # Identify excluded covariates
-  covs_exclude <- get_excluded_cov_regex(covSet)
+  all_covs$hab <- c(all_covs$hab,
+                    paste("lnNWt1", c(all_covs$hab), sep="X"))
+  # Randomly select covariate subset
+  set.seed(covSet$seed)
+  if(y_i.i$type=="hab") {
+    covs_exclude <- unlist(all_covs[2:3], use.names=F) %>%
+      sample(x=., size=floor(length(.)*(1-covSet$prop_covs)), replace=F)
+  } else {
+    covs_exclude <- unlist(all_covs[2:4], use.names=F) %>%
+      sample(x=., size=floor(length(.)*(1-covSet$prop_covs)), replace=F)
+  }
 
   # testing/training splits
   obs.ls <- map_dfr(dirf(data.dir, "data_.*_all.rds"), readRDS) |>
@@ -96,8 +100,8 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, test_prop=0.75,
   }
 
   # prepare dataset
-  prep.ls <- map(responses, ~prep_recipe(obs.train, .x, covs_exclude))
-  prepPCA.ls <- map(responses, ~prep_recipe(obs.train, .x, covs_exclude, TRUE))
+  prep.ls <- map(responses, ~prep_recipe2(obs.train, .x, covs_exclude))
+  prepPCA.ls <- map(responses, ~prep_recipe2(obs.train, .x, covs_exclude, TRUE))
   d.y <- list(train=map(prep.ls, ~bake(.x, obs.train)))
   dPCA.y <- list(train=map(prepPCA.ls, ~bake(.x, obs.train)))
   if(test_prop > 0) {
@@ -106,7 +110,7 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, test_prop=0.75,
   }
   saveRDS(d.y, glue("{data.dir}/compiled/{y.i}_{id}_dy_testPct-{test_prop}.rds"))
   saveRDS(dPCA.y, glue("{data.dir}/compiled/{y.i}_{id}_dPCAy_testPct-{test_prop}.rds"))
-  covs <- filter_corr_covs(all_covs, d.y, covs_exclude)
+  covs <- filter_corr_covs(all_covs, d.y) |> map(~.x[! .x %in% covs_exclude])
   covsPCA <- names(dPCA.y$train[[1]] |> select(starts_with("PC")))
 
   # formulas
@@ -123,7 +127,7 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, test_prop=0.75,
     )
   )
 
-  cat("Starting", f, "for", y.i, ":", as.character(Sys.time()), "\n",
+  cat("Starting", id, "for", y.i, ":", as.character(Sys.time()), "\n",
       file=glue("{log.dir}/{id}_{y.i}_{mod}.log"))
 
   for(r in responses) {
@@ -160,8 +164,8 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, test_prop=0.75,
         prior_i=priStr$i
       )
       priors <- map(responses,
-        ~list(HB=make_HB_priors(priStr, "HB", .x, covs),
-              HBL_PCA=make_HB_priors(priStr, "HB", .x, covsPCA, PCA=T))
+                    ~list(HB=make_HB_priors(priStr, "HB", .x, covs),
+                          HBL_PCA=make_HB_priors(priStr, "HB", .x, covsPCA, PCA=T))
       )
 
       # fit models
@@ -186,5 +190,5 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, test_prop=0.75,
     }
   }
 
-  cat("Finished", f, "for", y.i, ":", as.character(Sys.time()), "\n")
+  cat("Finished", id, "for", y.i, ":", as.character(Sys.time()), "\n")
 }
