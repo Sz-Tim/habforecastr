@@ -100,8 +100,8 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, test_prop=0.75,
   }
 
   # prepare dataset
-  prep.ls <- map(responses, ~prep_recipe2(obs.train, .x, covs_exclude))
-  prepPCA.ls <- map(responses, ~prep_recipe2(obs.train, .x, covs_exclude, TRUE))
+  prep.ls <- map(responses, ~prep_recipe(obs.train, .x, covs_exclude))
+  prepPCA.ls <- map(responses, ~prep_recipe(obs.train, .x, covs_exclude, TRUE))
   d.y <- list(train=map(prep.ls, ~bake(.x, obs.train)))
   dPCA.y <- list(train=map(prepPCA.ls, ~bake(.x, obs.train)))
   if(test_prop > 0) {
