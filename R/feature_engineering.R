@@ -201,6 +201,8 @@ summarise_hab_states <- function(site_tox.sf, site_hab.sf, tox.obs, hab.df) {
 
 #' Detrend observations using a loess smoother
 #'
+#' Calculates residuals from a loess smoother
+#'
 #' @param x
 #' @param y
 #' @param span
@@ -216,7 +218,7 @@ detrend_loess <- function (x, y, span=0.75, robust=TRUE) {
   if(length(y) < 10) {
     return(y)
   }
-  fam = ifelse(robust, "symmetric", "gaussian")
-  lo = stats::predict(stats::loess(y ~ x, span=span, family=fam), se = F)
+  fam <- ifelse(robust, "symmetric", "gaussian")
+  lo <- stats::predict(stats::loess(y ~ x, span=span, family=fam), se = F)
   return(c(y - lo))
 }
