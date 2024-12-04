@@ -32,11 +32,11 @@ prep_recipe <- function(train.df, response, covsExclude=NULL, dimReduce=FALSE) {
     step_interact(terms=~lon:lat, sep="X") |>
     step_interact(terms=~lnNWt1:all_predictors(), sep="X") |>
     # Wind x fetch x non-wind/non-interactions
-    # step_interact(terms=~UWk:fetch:matches("^(?![UV])(?=.*Dir)(?!.*X).*", perl=T), sep="X") |>
-    # step_interact(terms=~VWk:fetch:matches("^(?![UV])(?=.*Dir)(?!.*X).*", perl=T), sep="X") |>
+    step_interact(terms=~UWk:fetch:matches("^(?![UV])(?=.*Dir)(?!.*X).*", perl=T), sep="X") |>
+    step_interact(terms=~VWk:fetch:matches("^(?![UV])(?=.*Dir)(?!.*X).*", perl=T), sep="X") |>
 
-    step_interact(terms=~UWk:fetch:matches("^[Precip|Shortwave|sst].*Dir(?!.*X).*", perl=T), sep="X") |>
-    step_interact(terms=~VWk:fetch:matches("^[Precip|Shortwave|sst].*Dir(?!.*X).*", perl=T), sep="X") |>
+    # step_interact(terms=~UWk:fetch:matches("^[Precip|Shortwave|sst].*Dir(?!.*X).*", perl=T), sep="X") |>
+    # step_interact(terms=~VWk:fetch:matches("^[Precip|Shortwave|sst].*Dir(?!.*X).*", perl=T), sep="X") |>
     step_YeoJohnson(all_predictors()) |>
     step_normalize(all_predictors()) |>
     step_harmonic(yday, frequency=1, cycle_size=365, keep_original_cols=T) |>
