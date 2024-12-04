@@ -206,7 +206,7 @@ summarise_post_preds <- function(post, resp, y_i.i) {
 #' files <- c("path/to/predictions1.rds", "path/to/predictions2.rds")
 #' merged_preds <- merge_pred_dfs(files)
 #' }
-function(files, CV=NULL) {
+merge_pred_dfs <- function(files, CV=NULL) {
   f.df <- tibble(f=files,
                  covSet=str_split(files, "/") |>
                    map_chr(~grep("^d[0-9][0-9]?", .x, value=T)))
