@@ -4,11 +4,28 @@
 \alias{prep_recipe}
 \title{Create recipe and prepare using training data}
 \usage{
-prep_recipe(train.df, response, covsExclude = "NA", dimReduce = FALSE)
+prep_recipe(train.df, response, covsExclude = NULL, dimReduce = FALSE)
 }
 \arguments{
-\item{dimReduce}{}
+\item{train.df}{A data frame containing the training data.}
+
+\item{response}{A character string specifying the response variable.}
+
+\item{covsExclude}{A character vector of covariates to exclude from the recipe. Default is NULL.}
+
+\item{dimReduce}{A logical value indicating whether to apply dimensionality reduction (PCA). Default is FALSE.}
+}
+\value{
+A prepared recipe object.
 }
 \description{
-Create recipe and prepare using training data
+This function creates a recipe for data preprocessing and prepares it using the training data.
+}
+\examples{
+\dontrun{
+library(tidymodels)
+train.df <- data.frame(obsid = 1:10, y = rnorm(10), date = Sys.Date() - 1:10, siteid = 1:10, year = 2023, lon = runif(10), lat = runif(10), yday = 1:10, response = rnorm(10))
+response <- "response"
+recipe <- prep_recipe(train.df, response)
+}
 }

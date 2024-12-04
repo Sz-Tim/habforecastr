@@ -16,8 +16,38 @@ get_CMEMS(
 )
 }
 \arguments{
-\item{out.dir}{}
+\item{userid}{A character string specifying the user ID for CMEMS access.}
+
+\item{pw}{A character string specifying the password for CMEMS access.}
+
+\item{i.df}{A data frame containing information about the CMEMS layers to download, including server and variable IDs.}
+
+\item{bbox}{A bounding box specifying the geographical area of interest.}
+
+\item{nDays_buffer}{An integer specifying the number of days to buffer around the date range.}
+
+\item{dateRng}{A vector of two dates specifying the date range for the data.}
+
+\item{out.dir}{A character string specifying the output directory for saving the downloaded data.}
+
+\item{toolbox}{A logical value indicating whether to use a toolbox script for downloading. Default is TRUE.}
+}
+\value{
+A message indicating the completion of the download process.
 }
 \description{
-Download CMEMS layers
+TODO: This is deprecated following the updated access through the `copernicusmarine` toolbox.
+This function downloads Copernicus Marine Environment Monitoring Service (CMEMS) layers based on specified parameters.
+}
+\examples{
+\dontrun{
+userid <- "your_userid"
+pw <- "your_password"
+i.df <- data.frame(server = "my_server", ID = "my_id", source = "my_source", var = "my_var")
+bbox <- list(xmin = -10, xmax = 10, ymin = -10, ymax = 10)
+nDays_buffer <- 5
+dateRng <- as.Date(c("2023-01-01", "2023-12-31"))
+out.dir <- "path/to/output"
+get_CMEMS(userid, pw, i.df, bbox, nDays_buffer, dateRng, out.dir)
+}
 }

@@ -1,14 +1,28 @@
-#' Summarise and aggregate predictions for a set of models
 #'
-#' @param d.y
-#' @param set
-#' @param resp
-#' @param fit.dir
-#' @param y_i.i
-#' @param suffix
+#' This function summarises and aggregates predictions for a set of models, including both PCA and non-PCA models.
 #'
-#' @return
+#' @param d.y A list of data frames containing the data for each response variable.
+#' @param dPCA.y A list of data frames containing the PCA-transformed data for each response variable.
+#' @param resp A character string specifying the response variable.
+#' @param fit.dir A character string specifying the directory where the model fits are stored.
+#' @param y_i.i A data frame with information about the variables of interest.
+#' @param suffix A character string specifying a suffix for the model ID. Default is NULL.
+#'
+#' @return A data frame with the summarised and aggregated predictions.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidyverse)
+#' library(glue)
+#' library(tidymodels)
+#' d.y <- list(response = data.frame(obsid = 1:10, y = rnorm(10), date = Sys.Date() - 1:10, siteid = 1:10, response = rnorm(10)))
+#' dPCA.y <- list(response = data.frame(obsid = 1:10, y = rnorm(10), date = Sys.Date() - 1:10, siteid = 1:10, response = rnorm(10)))
+#' resp <- "response"
+#' fit.dir <- "path/to/fits"
+#' y_i.i <- data.frame(abbr = "response")
+#' predictions <- summarise_predictions(d.y, dPCA.y, resp, fit.dir, y_i.i)
+#' }
 summarise_predictions <- function(d.y, dPCA.y, resp, fit.dir, y_i.i, suffix=NULL) {
   library(tidyverse); library(glue); library(tidymodels)
   fits.f <- dirf(fit.dir, glue("{y_i.i$abbr[1]}_{resp}.*{ifelse(is.null(suffix),'',suffix)}"))
@@ -48,14 +62,30 @@ summarise_predictions <- function(d.y, dPCA.y, resp, fit.dir, y_i.i, suffix=NULL
 
 #' Generate predictions for a model
 #'
-#' @param fit
-#' @param mod
-#' @param resp
-#' @param d.df
-#' @param y_i.i
+#' This function generates predictions for a given model and response variable.
 #'
-#' @return
+#' @param fit A fitted model object.
+#' @param mod A character string specifying the model type.
+#' @param resp A character string specifying the response variable.
+#' @param d.df A data frame containing the data for prediction.
+#' @param y_i.i A data frame with information about the variables of interest.
+#'
+#' @return A data frame with the generated predictions.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidyverse)
+#' library(glue)
+#' library(tidymodels)
+#' library(brms)
+#' fit <- brm(mpg ~ wt + cyl, data = mtcars)
+#' mod <- "HB"
+#' resp <- "mpg"
+#' d.df <- list(mpg = mtcars)
+#' y_i.i <- data.frame(abbr = "mpg")
+#' predictions <- get_predictions(fit, mod, resp, d.df, y_i.i)
+#' }
 get_predictions <- function(fit, mod, resp, d.df, y_i.i) {
   library(tidyverse); library(glue); library(tidymodels); library(brms)
 
@@ -78,12 +108,22 @@ get_predictions <- function(fit, mod, resp, d.df, y_i.i) {
 
 #' Calculate mean predictions for ML models
 #'
-#' @param preds
-#' @param resp
-#' @param y_i.i
+#' This function calculates mean predictions for machine learning models.
 #'
-#' @return
+#' @param preds A data frame containing the predictions.
+#' @param resp A character string specifying the response variable.
+#' @param y_i.i A data frame with information about the variables of interest.
+#'
+#' @return A data frame with the mean predictions.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' preds <- tibble(.pred_A1 = runif(10))
+#' resp <- "alert"
+#' y_i.i <- data.frame(tl_thresh = "TL2", N_thresh = 1)
+#' mean_preds <- summarise_ML_preds(preds, resp, y_i.i)
+#' }
 summarise_ML_preds <- function(preds, resp, y_i.i) {
   if(resp=="alert") {
     pred <- cbind(A1=preds$.pred_A1)
@@ -107,12 +147,22 @@ summarise_ML_preds <- function(preds, resp, y_i.i) {
 
 #' Calculate mean predictions for HB models
 #'
-#' @param post
-#' @param resp
-#' @param y_i.i
+#' This function calculates posterior mean predictions for hierarchical Bayesian (HB) models.
 #'
-#' @return
+#' @param post A matrix containing the posterior predictions.
+#' @param resp A character string specifying the response variable.
+#' @param y_i.i A data frame with information about the variables of interest.
+#'
+#' @return A data frame with the mean predictions.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' post <- matrix(runif(100), nrow = 10)
+#' resp <- "alert"
+#' y_i.i <- data.frame(tl_thresh = "TL2", N_thresh = 1)
+#' mean_preds <- summarise_post_preds(post, resp, y_i.i)
+#' }
 summarise_post_preds <- function(post, resp, y_i.i) {
   if(resp=="alert") {
     pred <- cbind(A1=colMeans(post))
@@ -143,10 +193,19 @@ summarise_post_preds <- function(post, resp, y_i.i) {
 
 #' Merge summarised predictions across all models into single dataframes
 #'
-#' @param files vector of full file path
+#' This function merges summarised predictions across all models into single dataframes.
 #'
-#' @return
+#' @param files A vector of full file paths to the prediction files.
+#' @param CV A character string specifying the cross-validation type. Options are "HB", "ML", or NULL. Default is NULL.
+#'
+#' @return A list of data frames with the merged predictions.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' files <- c("path/to/predictions1.rds", "path/to/predictions2.rds")
+#' merged_preds <- merge_pred_dfs(files)
+#' }
 merge_pred_dfs <- function(files, CV=NULL) {
   f.df <- tibble(f=files,
                  covSet=str_split(files, "/") |>
@@ -199,12 +258,19 @@ merge_pred_dfs <- function(files, CV=NULL) {
 
 #' Calculate model weights based on mean log loss
 #'
-#' @param cv.df
-#' @param resp
-#' @param wt.penalty
+#' This function calculates model weights based on the mean log loss for different response variables.
 #'
-#' @return
+#' @param cv.df A data frame containing cross-validated predictions.
+#' @param resp A character string specifying the response variable. It can be "alert", "tl", or "lnN".
+#' @param wt.penalty A numeric value specifying the penalty for the weights. Default is 2.
+#'
+#' @return A data frame with model weights.
 #' @export
+#'
+#' @examples
+#' # Example usage:
+#' # cv.df <- data.frame(model1_A1 = runif(100), model2_A1 = runif(100), alert = sample(c(0, 1), 100, replace = TRUE))
+#' # calc_LL_wts(cv.df, resp = "alert")
 calc_LL_wts <- function(cv.df, resp, wt.penalty=2) {
   library(yardstick)
   if(resp=="alert") {

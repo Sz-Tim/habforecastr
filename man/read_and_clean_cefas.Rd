@@ -2,13 +2,22 @@
 % Please edit documentation in R/read_and_clean_sites.R
 \name{read_and_clean_cefas}
 \alias{read_and_clean_cefas}
-\title{Title}
+\title{Read and clean CEFAS data}
 \usage{
 read_and_clean_cefas(url_cefas, tox_i, sites, dateStart = "2016-01-01")
 }
 \arguments{
-\item{dateStart}{}
+\item{url_cefas}{A character string specifying the URL of the CEFAS data.}
+
+\item{tox_i}{A data frame containing information about toxin indices.}
+
+\item{sites}{A data frame containing site information.}
+
+\item{dateStart}{A character string specifying the start date (default is "2016-01-01").}
+}
+\value{
+A cleaned data frame with columns: obsid, lon, lat, sin, date, and toxin indices.
 }
 \description{
-Title
+This function reads and cleans CEFAS data from the specified URL.
 }

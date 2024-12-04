@@ -7,8 +7,22 @@
 split_to_NSEW(sf, radius = 110000)
 }
 \arguments{
-\item{radius}{}
+\item{sf}{An `sf` object representing the circular buffer.}
+
+\item{radius}{Numeric value specifying the radius of the buffer in meters. Default is 110,000 meters.}
+}
+\value{
+An `sf` object with the circular buffer split into NSEW quadrants.
 }
 \description{
-Split circular buffer into NSEW quadrants
+This function splits a circular buffer into four quadrants: North, South, East, and West.
+}
+\examples{
+\dontrun{
+library(sf)
+# Create a sample sf object
+sf <- st_as_sf(data.frame(siteid = 1, geometry = st_sfc(st_point(c(0, 0)))), crs = 27700)
+# Split the buffer into quadrants
+quadrants <- split_to_NSEW(sf, radius = 110e3)
+}
 }

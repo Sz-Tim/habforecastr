@@ -7,8 +7,24 @@
 load_datasets(sub.dir, target, ydayAvg.dir)
 }
 \arguments{
-\item{target}{}
+\item{sub.dir}{A character string specifying the subdirectory where the data files are located.}
+
+\item{target}{A character string specifying the target dataset (e.g., "tox").}
+
+\item{ydayAvg.dir}{A character string specifying the directory where the year-day average data files are located.}
+}
+\value{
+A list of data frames containing the compiled datasets.
 }
 \description{
-Load datasets for compilation
+This function loads and compiles various datasets for a specified target, including site data, observations, CMEMS data, WRF data, and additional environmental data.
+}
+\examples{
+\dontrun{
+library(tidyverse)
+sub.dir <- "subdirectory"
+target <- "tox"
+ydayAvg.dir <- "ydayAvg_directory"
+datasets <- load_datasets(sub.dir, target, ydayAvg.dir)
+}
 }

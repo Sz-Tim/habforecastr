@@ -14,8 +14,30 @@ compute_thresholds(
 )
 }
 \arguments{
-\item{prSteps}{}
+\item{L.df}{A dataframe containing the data to be evaluated.}
+
+\item{prMin}{A numeric value specifying the minimum probability threshold. Default is 0.}
+
+\item{prMax}{A numeric value specifying the maximum probability threshold. Default is 1.}
+
+\item{prSteps}{A numeric value specifying the step size for probability thresholds. Default is 0.1.}
+
+\item{byPrevAlert}{A logical value indicating whether to group by previous alert status. Default is FALSE.}
+
+\item{cores}{An integer specifying the number of cores to use for parallel processing. Default is 1.}
+}
+\value{
+A dataframe with the computed metrics for each probability threshold.
 }
 \description{
-Compute classification metrics across probability thresholds
+This function computes classification metrics (F1 score, precision, recall, and MCC) across different probability thresholds.
+}
+\examples{
+\dontrun{
+library(tidyverse)
+library(yardstick)
+library(furrr)
+L.df <- tibble(alert = factor(c("A1", "A0", "A1", "A0")), prA1 = runif(4))
+metrics <- compute_thresholds(L.df)
+}
 }

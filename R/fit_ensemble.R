@@ -1,12 +1,26 @@
 #' Calculate ensemble model predictions
 #'
-#' @param out.ls
-#' @param wt.ls
-#' @param resp
-#' @param y_i.i
+#' This function calculates ensemble model predictions using various methods, including weighted mean, generalized linear models (GLM), random forests (RF), and hierarchical Bayesian (HB) models.
 #'
-#' @return
+#' @param out.ls A list of data frames containing model predictions.
+#' @param wt.ls A list of data frames containing model weights.
+#' @param resp A character string specifying the response variable (e.g., `"alert"`, `"tl"`, `"lnN"`).
+#' @param y_i.i A data frame with information about the variables of interest, including thresholds.
+#' @param method A character string specifying the ensemble method to use. Default is `"wtmean"`.
+#' @param out.path A character string specifying the output path for saving model results. Default is `NULL`.
+#' @param opt Optional parameter for additional method-specific options. Default is `NULL`.
+#'
+#' @return A data frame with ensemble model predictions.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidymodels)
+#' out.ls <- list(alert = data.frame(obsid = 1:10, model1_A1 = runif(10), model2_A1 = runif(10)))
+#' wt.ls <- list(alert = data.frame(obsid = 1:10, wt = runif(10)))
+#' y_i.i <- data.frame(abbr = "alert", tl_thresh = "TL2", N_thresh = 1)
+#' result <- fit_ensemble(out.ls, wt.ls, "alert", y_i.i, method = "wtmean")
+#' }
 fit_ensemble <- function(out.ls, wt.ls, resp, y_i.i, method="wtmean", out.path=NULL, opt=NULL) {
   library(tidyverse); library(tidymodels)
   if(grepl("RF|GLM|HB", method) & resp != "alert") {

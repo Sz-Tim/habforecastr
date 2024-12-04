@@ -15,8 +15,32 @@ fit_ensemble(
 )
 }
 \arguments{
-\item{y_i.i}{}
+\item{out.ls}{A list of data frames containing model predictions.}
+
+\item{wt.ls}{A list of data frames containing model weights.}
+
+\item{resp}{A character string specifying the response variable (e.g., `"alert"`, `"tl"`, `"lnN"`).}
+
+\item{y_i.i}{A data frame with information about the variables of interest, including thresholds.}
+
+\item{method}{A character string specifying the ensemble method to use. Default is `"wtmean"`.}
+
+\item{out.path}{A character string specifying the output path for saving model results. Default is `NULL`.}
+
+\item{opt}{Optional parameter for additional method-specific options. Default is `NULL`.}
+}
+\value{
+A data frame with ensemble model predictions.
 }
 \description{
-Calculate ensemble model predictions
+This function calculates ensemble model predictions using various methods, including weighted mean, generalized linear models (GLM), random forests (RF), and hierarchical Bayesian (HB) models.
+}
+\examples{
+\dontrun{
+library(tidymodels)
+out.ls <- list(alert = data.frame(obsid = 1:10, model1_A1 = runif(10), model2_A1 = runif(10)))
+wt.ls <- list(alert = data.frame(obsid = 1:10, wt = runif(10)))
+y_i.i <- data.frame(abbr = "alert", tl_thresh = "TL2", N_thresh = 1)
+result <- fit_ensemble(out.ls, wt.ls, "alert", y_i.i, method = "wtmean")
+}
 }

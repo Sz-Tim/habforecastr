@@ -2,13 +2,24 @@
 % Please edit documentation in R/read_and_clean_sites.R
 \name{read_and_clean_fish}
 \alias{read_and_clean_fish}
-\title{Title}
+\title{Read and clean fish data}
 \usage{
 read_and_clean_fish(url_mowi, url_ssf, fish_i, sites, dateStart = "2016-01-01")
 }
 \arguments{
-\item{dateStart}{}
+\item{url_mowi}{A character string specifying the URL of the MOWI data.}
+
+\item{url_ssf}{A character string specifying the URL of the SSF data.}
+
+\item{fish_i}{A data frame containing information about fish indices.}
+
+\item{sites}{A data frame containing site information.}
+
+\item{dateStart}{A character string specifying the start date (default is "2016-01-01").}
+}
+\value{
+A cleaned data frame with columns: obsid, lon, lat, sin, date, and fish indices.
 }
 \description{
-Title
+This function reads and cleans fish data from the specified URLs.
 }

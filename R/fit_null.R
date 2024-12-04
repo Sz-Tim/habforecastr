@@ -1,11 +1,21 @@
 #' Identify rows in y within thresh days of x
 #'
-#' @param x
-#' @param y
-#' @param thresh
+#' This function identifies rows where the absolute difference between the day of the year values in `x` and `y` is within a specified threshold.
 #'
-#' @return
+#' @param x A numeric vector representing day of the year values.
+#' @param y A numeric vector representing day of the year values to compare against.
+#' @param thresh A numeric value specifying the threshold for the absolute difference.
+#'
+#' @return A numeric vector of row indices where the absolute difference is within the threshold.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' x <- c(10, 50, 100, 200, 300)
+#' y <- c(15, 55, 105, 205, 305)
+#' thresh <- 5
+#' result <- get_rows_by_yday(x, y, thresh)
+#' }
 get_rows_by_yday <- function(x, y, thresh) {
   xy_diff <- x - y
   comp.mx <- cbind(abs(xy_diff),
@@ -22,11 +32,20 @@ get_rows_by_yday <- function(x, y, thresh) {
 
 #' Calculate null model predictions
 #'
-#' @param obs.ls
-#' @param resp
+#' This function calculates null model predictions for different response variables by averaging observations within a specified time window.
 #'
-#' @return
+#' @param obs.ls A list of data frames containing observations for different response variables.
+#' @param resp A character string specifying the response variable (e.g., `"alert"`, `"tl"`, `"lnN"`).
+#'
+#' @return A list containing two data frames: `yday.df` with null model predictions for each day of the year, and `obs.df` with the original observations and corresponding null model predictions.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidyverse)
+#' obs.ls <- list(alert = data.frame(date = Sys.Date() - 1:10, alert = sample(c("A1", "A2"), 10, replace = TRUE)))
+#' result <- calc_null(obs.ls, "alert")
+#' }
 calc_null <- function(obs.ls, resp) {
   library(tidyverse)
   obs.df <- obs.ls[[resp]] |>

@@ -7,8 +7,30 @@
 summarise_hab_states(site_tox.sf, site_hab.sf, tox.obs, hab.df)
 }
 \arguments{
-\item{hab.df}{}
+\item{site_tox.sf}{An `sf` object representing the toxin observation sites.}
+
+\item{site_hab.sf}{An `sf` object representing the HAB observation sites.}
+
+\item{tox.obs}{A data frame containing toxin observations.}
+
+\item{hab.df}{A data frame containing HAB observations.}
+}
+\value{
+A data frame with toxin observations and summarised HAB states.
 }
 \description{
-Summarise HAB states for each toxin observation
+This function summarises Harmful Algal Bloom (HAB) states for each toxin observation by calculating the mean values of HAB-related variables within a specified time window.
+}
+\examples{
+\dontrun{
+library(sf)
+# Create sample sf objects for toxin and HAB sites
+site_tox.sf <- st_as_sf(data.frame(siteid = 1:3, geom = st_sfc(st_point(c(0, 0)), st_point(c(1, 1)), st_point(c(2, 2)))), crs = 4326)
+site_hab.sf <- st_as_sf(data.frame(siteid = 4:6, geom = st_sfc(st_point(c(0.5, 0.5)), st_point(c(1.5, 1.5)), st_point(c(2.5, 2.5)))), crs = 4326)
+# Create sample data frames for toxin and HAB observations
+tox.obs <- data.frame(siteid = 1:3, date = Sys.Date() - 1:3)
+hab.df <- data.frame(siteid = 4:6, date = Sys.Date() - 1:6, y = rep("HAB", 6), lnN = rnorm(6), alert = rep("A1", 6))
+# Summarise HAB states for each toxin observation
+result <- summarise_hab_states(site_tox.sf, site_hab.sf, tox.obs, hab.df)
+}
 }

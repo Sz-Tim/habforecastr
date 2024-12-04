@@ -7,8 +7,22 @@
 axe_env_bayesian(x, verbose = FALSE, ...)
 }
 \arguments{
-\item{...}{}
+\item{x}{A fitted Bayesian model object.}
+
+\item{verbose}{A logical value indicating whether to print detailed information during the process. Default is FALSE.}
+
+\item{...}{Additional arguments (currently not used).}
+}
+\value{
+The modified Bayesian model object with reduced environments.
 }
 \description{
-Adapted from butcher::axe_env for bayesian(engine='brms')
+This function adapts the `butcher::axe_env()` function for Bayesian models fitted with the `brms` engine, removing unnecessary environments to reduce the size of the model object.
+}
+\examples{
+\dontrun{
+library(brms)
+fit <- brm(mpg ~ wt + cyl, data = mtcars)
+fit_reduced <- axe_env_bayesian(fit)
+}
 }

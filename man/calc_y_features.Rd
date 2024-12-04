@@ -13,8 +13,30 @@ calc_y_features(
 )
 }
 \arguments{
-\item{site.100km}{}
+\item{yRaw.df}{A data frame containing raw observations of HAB and toxins.}
+
+\item{y_i}{A data frame with information about the variables of interest, including abbreviations.}
+
+\item{tl_i}{A data frame containing traffic light (`tl`), alert (`A`), abbreviation (`abbr`), and minimum threshold (`min_ge`) values.}
+
+\item{dist.df}{A data frame containing distance information between sites. Default is `NULL`.}
+
+\item{forecastStart}{A character string specifying the start date for forecasting. Default is `"3000-01-01"`.}
+
+\item{site.100km}{A data frame with site information within a 100 km radius.}
+}
+\value{
+A data frame with calculated autoregressive terms and additional features for each observation.
 }
 \description{
-Calculate local and regional autoregressive terms for HAB and toxin observations
+This function calculates local and regional autoregressive terms for Harmful Algal Bloom (HAB) and toxin observations.
+}
+\examples{
+\dontrun{
+yRaw.df <- data.frame(siteid = rep(1:3, each = 10), date = rep(seq.Date(Sys.Date(), by = "day", length.out = 10), 3), N = rnorm(30))
+y_i <- data.frame(abbr = c("HAB", "Toxin"))
+tl_i <- data.frame(tl = c("Green", "Yellow", "Red"), A = c("Low", "Medium", "High"), abbr = c("HAB", "Toxin"), min_ge = c(0, 1, 2))
+dist.df <- data.frame(origins = rep(1:3, each = 3), dest_c = list(1:3, 1:3, 1:3))
+result <- calc_y_features(yRaw.df, y_i, tl_i, dist.df)
+}
 }

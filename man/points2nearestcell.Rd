@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_site_geography.R
 \name{points2nearestcell}
 \alias{points2nearestcell}
-\title{Shift out-of-bounds pointsto nearest cell}
+\title{Shift out-of-bounds points to nearest cell}
 \usage{
 points2nearestcell(
   locs = NULL,
@@ -14,8 +14,29 @@ points2nearestcell(
 )
 }
 \arguments{
-\item{showchanges}{}
+\item{locs}{A spatial object (e.g., `SpatialPointsDataFrame`) containing point locations.}
+
+\item{ras}{A raster object.}
+
+\item{layer}{An integer specifying the layer of the raster to check. Default is 1.}
+
+\item{move}{A logical value indicating whether to move the points to the nearest valid cell. Default is TRUE.}
+
+\item{distance}{A numeric value specifying the maximum distance to move points. Points farther than this distance will not be moved. Default is NULL.}
+
+\item{showchanges}{A logical value indicating whether to print the changes made. Default is TRUE.}
+}
+\value{
+The modified spatial object with points shifted to the nearest valid raster cell.
 }
 \description{
-Shift out-of-bounds pointsto nearest cell
+This function shifts point locations that fall outside valid raster cells to the nearest valid cell.
+}
+\examples{
+\dontrun{
+library(raster)
+locs <- SpatialPointsDataFrame(coords = matrix(runif(10), ncol = 2), data = data.frame(id = 1:5))
+ras <- raster(matrix(runif(100), 10, 10))
+result <- points2nearestcell(locs, ras)
+}
 }

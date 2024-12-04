@@ -7,8 +7,32 @@
 get_WRF(wrf.dir, nDays_buffer, dateRng, out.dir, forecast = F)
 }
 \arguments{
-\item{out.dir}{}
+\item{wrf.dir}{A character string specifying the directory or URL where WRF files are located.}
+
+\item{nDays_buffer}{An integer specifying the number of days to buffer around the date range.}
+
+\item{dateRng}{A vector of two dates specifying the date range for the data.}
+
+\item{out.dir}{A character string specifying the output directory for saving the downloaded data.}
+
+\item{forecast}{A logical value indicating whether to download forecast data. Default is FALSE.}
+}
+\value{
+A message indicating the completion of the download process.
 }
 \description{
-Download WRF data
+This function downloads Weather Research and Forecasting (WRF) model data based on specified parameters.
+}
+\examples{
+\dontrun{
+library(tidyverse)
+library(ncdf4)
+library(lubridate)
+library(glue)
+wrf.dir <- "https://thredds.sams.ac.uk/thredds/catalog/scoats-wrf/Archive/catalog.html"
+nDays_buffer <- 5
+dateRng <- as.Date(c("2023-01-01", "2023-01-14"))
+out.dir <- "path/to/output"
+get_WRF(wrf.dir, nDays_buffer, dateRng, out.dir)
+}
 }

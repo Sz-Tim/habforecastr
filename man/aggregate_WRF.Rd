@@ -2,13 +2,27 @@
 % Please edit documentation in R/get_WRF.R
 \name{aggregate_WRF}
 \alias{aggregate_WRF}
-\title{Title}
+\title{Aggregate WRF Data}
 \usage{
 aggregate_WRF(wrf.out, v2_start = ymd("2019-04-01"), refreshStart = NULL)
 }
 \arguments{
-\item{refreshStart}{}
+\item{wrf.out}{A character string specifying the output directory where WRF data is stored.}
+
+\item{v2_start}{A Date object specifying the start date for version 2 of the data. Default is `ymd("2019-04-01")`.}
+
+\item{refreshStart}{A Date object specifying the start date for refreshing the data. Default is NULL.}
+}
+\value{
+A data frame containing the aggregated WRF data with transformations applied.
 }
 \description{
-Title
+This function aggregates Weather Research and Forecasting (WRF) model data from multiple domains, filters out invalid data, and applies transformations to certain variables.
+}
+\examples{
+\dontrun{
+library(lubridate)
+wrf.out <- "path/to/wrf_output"
+result <- aggregate_WRF(wrf.out)
+}
 }

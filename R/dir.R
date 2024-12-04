@@ -1,8 +1,10 @@
 #' Shortcut for dir(..., full.names=T)
 #'
-#' @param ...
+#' @param ... Arguments to `dir()`. Usually path and possibly pattern
 #'
-#' @return
+#' @return A character vector containing the names of the files in the specified
+#' directories (empty if there were no files). If a path does not exist or is
+#' not a directory or is unreadable it is skipped.
 #' @export
 dirf <- function(...) {
   dir(..., full.names=T)
@@ -12,9 +14,11 @@ dirf <- function(...) {
 
 #' Shortcut for dir(..., full.names=T, recursive=T)
 #'
-#' @param ...
+#' @param ... Arguments to `dir()`. Usually path and possibly pattern
 #'
-#' @return
+#' @return A character vector containing the names of the files in the specified
+#' directories (empty if there were no files). If a path does not exist or is
+#' not a directory or is unreadable it is skipped.
 #' @export
 dirrf <- function(...) {
   dir(..., full.names=T, recursive=T)
@@ -24,9 +28,11 @@ dirrf <- function(...) {
 
 #' Shortcut for dir(..., recursive=T)
 #'
-#' @param ...
+#' @param ... Arguments to `dir()`. Usually path and possibly pattern
 #'
-#' @return
+#' @return A character vector containing the names of the files in the specified
+#' directories (empty if there were no files). If a path does not exist or is
+#' not a directory or is unreadable it is skipped.
 #' @export
 dirr <- function(...) {
   dir(..., recursive=T)

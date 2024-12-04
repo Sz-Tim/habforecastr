@@ -7,12 +7,20 @@
 get_lags(data, ..., n = 2)
 }
 \arguments{
-\item{data}{Dataframe}
+\item{data}{A data frame.}
 
-\item{...}{Unquoted variable names to lag}
+\item{...}{Unquoted variable names to lag.}
 
-\item{n}{Number of lags}
+\item{n}{An integer specifying the number of lags (default is 2).}
+}
+\value{
+A data frame with the original variables and their lagged versions.
 }
 \description{
-From https://stackoverflow.com/questions/55814028/multiple-lags-with-dplyr
+This function creates multiple lagged versions of specified variables in a data frame.
+}
+\examples{
+# Example usage:
+# df <- data.frame(time = 1:10, value = rnorm(10))
+# get_lags(df, value, n = 3)
 }

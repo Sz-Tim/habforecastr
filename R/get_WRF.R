@@ -1,12 +1,28 @@
 #' Download WRF data
 #'
-#' @param wrf.dir
-#' @param nDays_buffer
-#' @param dateRng
-#' @param out.dir
+#' This function downloads Weather Research and Forecasting (WRF) model data based on specified parameters.
 #'
-#' @return
+#' @param wrf.dir A character string specifying the directory or URL where WRF files are located.
+#' @param nDays_buffer An integer specifying the number of days to buffer around the date range.
+#' @param dateRng A vector of two dates specifying the date range for the data.
+#' @param out.dir A character string specifying the output directory for saving the downloaded data.
+#' @param forecast A logical value indicating whether to download forecast data. Default is FALSE.
+#'
+#' @return A message indicating the completion of the download process.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidyverse)
+#' library(ncdf4)
+#' library(lubridate)
+#' library(glue)
+#' wrf.dir <- "https://thredds.sams.ac.uk/thredds/catalog/scoats-wrf/Archive/catalog.html"
+#' nDays_buffer <- 5
+#' dateRng <- as.Date(c("2023-01-01", "2023-01-14"))
+#' out.dir <- "path/to/output"
+#' get_WRF(wrf.dir, nDays_buffer, dateRng, out.dir)
+#' }
 get_WRF <- function(wrf.dir, nDays_buffer, dateRng, out.dir, forecast=F) {
   library(tidyverse); library(ncdf4); library(lubridate); library(glue);
   library(xml2); library(rvest)
@@ -107,10 +123,19 @@ get_WRF <- function(wrf.dir, nDays_buffer, dateRng, out.dir, forecast=F) {
 
 #' Identify preserved points within nested WRF domains
 #'
-#' @param nc.ls
+#' This function identifies preserved points within nested Weather Research and Forecasting (WRF) model domains.
 #'
-#' @return
+#' @param nc.ls A list of NetCDF file connections for the WRF domains.
+#'
+#' @return A list of data frames containing the preserved points for each WRF domain.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(ncdf4)
+#' nc.ls <- list(d01 = nc_open("path/to/d01.nc"), d02 = nc_open("path/to/d02.nc"), d03 = nc_open("path/to/d03.nc"))
+#' result <- nest_WRF_domains(nc.ls)
+#' }
 nest_WRF_domains <- function(nc.ls) {
   library(tidyverse); library(ncdf4); library(sf)
   nDomain <- length(nc.ls)
@@ -159,12 +184,23 @@ nest_WRF_domains <- function(nc.ls) {
 
 #' Filter WRF data to include only preserved points in each domain
 #'
-#' @param domain
-#' @param wrf.out
-#' @param v2_start
+#' This function filters Weather Research and Forecasting (WRF) model data to include only preserved points in each domain.
 #'
-#' @return
+#' @param domain A character string specifying the WRF domain (e.g., "d01", "d02", "d03").
+#' @param wrf.out A character string specifying the output directory where WRF data is stored.
+#' @param v2_start A character string specifying the start date for version 2 of the data. Default is NULL.
+#' @param refreshStart A character string specifying the start date for refreshing the data. Default is NULL.
+#'
+#' @return A data frame containing the filtered WRF data with preserved points.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidyverse)
+#' domain <- "d01"
+#' wrf.out <- "path/to/wrf_output"
+#' result <- subset_WRF(domain, wrf.out)
+#' }
 subset_WRF <- function(domain, wrf.out, v2_start=NULL, refreshStart=NULL) {
   f.domain <- dirf(wrf.out, glue("wrfDomains_.*{domain}.rds"))
   f.wrf <- dirf(wrf.out, glue("wrfF?_.*{domain}.rds"))
@@ -209,14 +245,23 @@ subset_WRF <- function(domain, wrf.out, v2_start=NULL, refreshStart=NULL) {
 
 
 
-#' Title
+#' Aggregate WRF Data
 #'
-#' @param wrf.out
-#' @param v2_start
-#' @param refreshStart
+#' This function aggregates Weather Research and Forecasting (WRF) model data from multiple domains, filters out invalid data, and applies transformations to certain variables.
 #'
-#' @return
+#' @param wrf.out A character string specifying the output directory where WRF data is stored.
+#' @param v2_start A Date object specifying the start date for version 2 of the data. Default is `ymd("2019-04-01")`.
+#' @param refreshStart A Date object specifying the start date for refreshing the data. Default is NULL.
+#'
+#' @return A data frame containing the aggregated WRF data with transformations applied.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(lubridate)
+#' wrf.out <- "path/to/wrf_output"
+#' result <- aggregate_WRF(wrf.out)
+#' }
 aggregate_WRF <- function(wrf.out, v2_start=ymd("2019-04-01"), refreshStart=NULL) {
   d01 <- subset_WRF("d01", wrf.out, v2_start=v2_start, refreshStart)
   d02 <- subset_WRF("d02", wrf.out, v2_start=v2_start, refreshStart)

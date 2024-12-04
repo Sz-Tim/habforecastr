@@ -7,8 +7,25 @@
 subset_WRF(domain, wrf.out, v2_start = NULL, refreshStart = NULL)
 }
 \arguments{
-\item{v2_start}{}
+\item{domain}{A character string specifying the WRF domain (e.g., "d01", "d02", "d03").}
+
+\item{wrf.out}{A character string specifying the output directory where WRF data is stored.}
+
+\item{v2_start}{A character string specifying the start date for version 2 of the data. Default is NULL.}
+
+\item{refreshStart}{A character string specifying the start date for refreshing the data. Default is NULL.}
+}
+\value{
+A data frame containing the filtered WRF data with preserved points.
 }
 \description{
-Filter WRF data to include only preserved points in each domain
+This function filters Weather Research and Forecasting (WRF) model data to include only preserved points in each domain.
+}
+\examples{
+\dontrun{
+library(tidyverse)
+domain <- "d01"
+wrf.out <- "path/to/wrf_output"
+result <- subset_WRF(domain, wrf.out)
+}
 }

@@ -1,20 +1,31 @@
 
 
 
-#' Title
+#' Fit a subset of available covariates
 #'
-#' @param y_i
-#' @param run_type
-#' @param covSet
-#' @param mod
-#' @param test_prop
-#' @param nTuneVal
-#' @param prior_strength
-#' @param ncores
-#' @param responses
+#' This function subsets the available covariates, fitting a specified model with that subset.
 #'
-#' @return
+#' @param y_i A data frame with information about the variables of interest, including abbreviations.
+#' @param run_type A character string specifying the run type. Default is "0_init".
+#' @param covSet A list containing the covariate set information.
+#' @param mod A character string specifying the model to fit (e.g., "Ridge", "ENet", "RF", "NN", "MARS", "Boost", "lgbm", "HB").
+#' @param test_prop A numeric value specifying the proportion of data to use for testing. Default is 0.75.
+#' @param nTuneVal A numeric value specifying the number of tuning values. Default is 2.
+#' @param prior_strength A numeric value specifying the strength of the priors. Default is 1.
+#' @param ncores A numeric value specifying the number of cores to use for parallel processing. Default is 4.
+#' @param responses A character vector specifying the response variables. Default is c(alert = "alert").
+#'
+#' @return None. Data, fitted objects, and logs are stored.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidymodels)
+#' y_i <- data.frame(abbr = c("HAB", "Toxin"))
+#' covSet <- list(id = "example", y = "HAB", prop_covs = 0.5, seed = 123)
+#' mod <- "Ridge"
+#' fit_covSet(y_i, run_type = "0_init", covSet, mod, test_prop = 0.75, nTuneVal = 2, prior_strength = 1, ncores = 4, responses = c(alert = "alert"))
+#' }
 fit_covSet <- function(y_i, run_type="0_init", covSet, mod, test_prop=0.75,
                        nTuneVal=2, prior_strength=1, ncores=4,
                        responses=c(alert="alert")) {

@@ -7,8 +7,18 @@
 nest_WRF_domains(nc.ls)
 }
 \arguments{
-\item{nc.ls}{}
+\item{nc.ls}{A list of NetCDF file connections for the WRF domains.}
+}
+\value{
+A list of data frames containing the preserved points for each WRF domain.
 }
 \description{
-Identify preserved points within nested WRF domains
+This function identifies preserved points within nested Weather Research and Forecasting (WRF) model domains.
+}
+\examples{
+\dontrun{
+library(ncdf4)
+nc.ls <- list(d01 = nc_open("path/to/d01.nc"), d02 = nc_open("path/to/d02.nc"), d03 = nc_open("path/to/d03.nc"))
+result <- nest_WRF_domains(nc.ls)
+}
 }

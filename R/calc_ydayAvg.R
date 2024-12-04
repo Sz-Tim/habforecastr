@@ -2,7 +2,7 @@
 #' Calculate average for each day of year
 #'
 #' @param data_df Dataframe
-#' @param out_f Output file
+#' @param out_f Output filename
 #' @param ... Columns to group by
 #'
 #' @return Written object to out_f only

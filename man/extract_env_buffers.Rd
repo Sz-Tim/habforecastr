@@ -7,8 +7,26 @@
 extract_env_buffers(site.buffer, vars, env.df, id_env)
 }
 \arguments{
-\item{id_env}{}
+\item{site.buffer}{sf object with site quadrants.}
+
+\item{vars}{List containing column names for environmental variables. Should include `all` and optionally `sea`.}
+
+\item{env.df}{Data frame containing environmental data with a `date` column.}
+
+\item{id_env}{Character vector of column names in `site.buffer` used to match with `env.df`.}
+}
+\value{
+A data frame with environmental data aggregated within site buffer quadrants.
 }
 \description{
-Extract CMEMS or WRF data within site buffer quadrants
+This function extracts environmental data from CMEMS or WRF datasets within specified site buffer quadrants.
+}
+\examples{
+\dontrun{
+site.buffer <- st_read("path/to/site_buffer.shp")
+vars <- list(all = c("temp", "salinity"), sea = c("sst"))
+env.df <- read.csv("path/to/env_data.csv")
+id_env <- c("siteid", "quadrant")
+result <- extract_env_buffers(site.buffer, vars, env.df, id_env)
+}
 }

@@ -7,8 +7,15 @@
 find_buffer_intersect_ids(site.sf, env.sf, id_env)
 }
 \arguments{
-\item{id_env}{}
+\item{site.sf}{An `sf` object with site quadrants.}
+
+\item{env.sf}{An `sf` object with environmental features.}
+
+\item{id_env}{A character string specifying the ID column in `env.sf`.}
+}
+\value{
+A data frame with the intersecting environmental feature IDs added.
 }
 \description{
-Find ids of environmental layer points within each site buffer
+This function finds the IDs of environmental layer points that fall within each site buffer.
 }

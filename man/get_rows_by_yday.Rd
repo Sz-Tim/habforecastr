@@ -7,8 +7,23 @@
 get_rows_by_yday(x, y, thresh)
 }
 \arguments{
-\item{thresh}{}
+\item{x}{A numeric vector representing day of the year values.}
+
+\item{y}{A numeric vector representing day of the year values to compare against.}
+
+\item{thresh}{A numeric value specifying the threshold for the absolute difference.}
+}
+\value{
+A numeric vector of row indices where the absolute difference is within the threshold.
 }
 \description{
-Identify rows in y within thresh days of x
+This function identifies rows where the absolute difference between the day of the year values in `x` and `y` is within a specified threshold.
+}
+\examples{
+\dontrun{
+x <- c(10, 50, 100, 200, 300)
+y <- c(15, 55, 105, 205, 305)
+thresh <- 5
+result <- get_rows_by_yday(x, y, thresh)
+}
 }

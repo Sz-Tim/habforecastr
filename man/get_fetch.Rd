@@ -7,8 +7,22 @@
 get_fetch(site.df, fetch.path)
 }
 \arguments{
-\item{fetch.path}{}
+\item{site.df}{A data frame containing site information, including longitude and latitude.}
+
+\item{fetch.path}{A character string specifying the path to the fetch raster file.}
+}
+\value{
+A data frame with the original site information and an additional column for fetch.
 }
 \description{
-Extract fetch for each site point location
+This function extracts the fetch (distance over water) for each site point location from a specified raster file.
+}
+\examples{
+\dontrun{
+library(tidyverse)
+library(sf)
+site.df <- data.frame(siteid = 1:5, lon = runif(5, -10, 10), lat = runif(5, -10, 10))
+fetch.path <- "path/to/fetch_raster.tif"
+result <- get_fetch(site.df, fetch.path)
+}
 }

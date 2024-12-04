@@ -7,7 +7,11 @@
 createFoldsByYear(data.df)
 }
 \arguments{
-\item{data.df}{}
+\item{data.df}{Dataframe}
+}
+\value{
+List of 2 lists where `i.in` gives the row indexes to include in
+each fold, and `i.out` gives the indexes to exclude in each fold.
 }
 \description{
 Identify indexes for ML training

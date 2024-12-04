@@ -2,13 +2,30 @@
 % Please edit documentation in R/HB_setup.R
 \name{make_HB_formula}
 \alias{make_HB_formula}
-\title{Create formulas for Hierarchical Bayesian models}
+\title{Create formulas for Hierarchical Bayesian models
+This function creates formulas for Hierarchical Bayesian models, incorporating specified covariates and spline interactions.}
 \usage{
 make_HB_formula(resp, covs, splinesInt = "both")
 }
 \arguments{
-\item{splinesInt}{}
+\item{resp}{A character string specifying the response variable.}
+
+\item{covs}{A character vector of covariates to include in the model.}
+
+\item{splinesInt}{A character string specifying the type of spline interactions to include. Options are "time", "space", or "both". Default is "both".}
+}
+\value{
+A `brmsformula` object for the specified Hierarchical Bayesian model.
 }
 \description{
 Create formulas for Hierarchical Bayesian models
+This function creates formulas for Hierarchical Bayesian models, incorporating specified covariates and spline interactions.
+}
+\examples{
+\dontrun{
+library(brms)
+resp <- "lnN"
+covs <- c("cov1", "cov2", "cov3")
+formula <- make_HB_formula(resp, covs, splinesInt = "both")
+}
 }

@@ -7,8 +7,23 @@
 summarise_post_preds(post, resp, y_i.i)
 }
 \arguments{
-\item{y_i.i}{}
+\item{post}{A matrix containing the posterior predictions.}
+
+\item{resp}{A character string specifying the response variable.}
+
+\item{y_i.i}{A data frame with information about the variables of interest.}
+}
+\value{
+A data frame with the mean predictions.
 }
 \description{
-Calculate mean predictions for HB models
+This function calculates posterior mean predictions for hierarchical Bayesian (HB) models.
+}
+\examples{
+\dontrun{
+post <- matrix(runif(100), nrow = 10)
+resp <- "alert"
+y_i.i <- data.frame(tl_thresh = "TL2", N_thresh = 1)
+mean_preds <- summarise_post_preds(post, resp, y_i.i)
+}
 }

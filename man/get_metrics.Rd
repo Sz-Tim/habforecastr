@@ -7,9 +7,18 @@
 get_metrics(dat)
 }
 \arguments{
-\item{dat}{}
+\item{dat}{A dataframe containing the data to be evaluated.}
+}
+\value{
+A tibble with the calculated metrics: F1 score, precision, recall, and MCC.
 }
 \description{
-This is a function to pass to future_map to avoid capturing large objects
-in the environment which makes it extraordinarily slow
+This function calculates the F1 score, precision, recall, and Matthews correlation coefficient (MCC) for a given dataframe. It is designed to be used with `future_map` to avoid capturing large objects in the environment, which can slow down the process.
+}
+\examples{
+\dontrun{
+library(tidyverse)
+dat <- tibble(alert = factor(c("A1", "A0", "A1", "A0")), pred = factor(c("A1", "A0", "A0", "A1")))
+metrics <- get_metrics(dat)
+}
 }

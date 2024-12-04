@@ -7,8 +7,20 @@
 calc_LL_wts(cv.df, resp, wt.penalty = 2)
 }
 \arguments{
-\item{wt.penalty}{}
+\item{cv.df}{A data frame containing cross-validated predictions.}
+
+\item{resp}{A character string specifying the response variable. It can be "alert", "tl", or "lnN".}
+
+\item{wt.penalty}{A numeric value specifying the penalty for the weights. Default is 2.}
+}
+\value{
+A data frame with model weights.
 }
 \description{
-Calculate model weights based on mean log loss
+This function calculates model weights based on the mean log loss for different response variables.
+}
+\examples{
+# Example usage:
+# cv.df <- data.frame(model1_A1 = runif(100), model2_A1 = runif(100), alert = sample(c(0, 1), 100, replace = TRUE))
+# calc_LL_wts(cv.df, resp = "alert")
 }

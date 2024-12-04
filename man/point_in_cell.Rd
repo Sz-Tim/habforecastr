@@ -7,8 +7,23 @@
 point_in_cell(locs, ras, layer = 1)
 }
 \arguments{
-\item{layer}{}
+\item{locs}{A spatial object (e.g., `SpatialPointsDataFrame`) containing point locations.}
+
+\item{ras}{A raster object.}
+
+\item{layer}{An integer specifying the layer of the raster to check. Default is 1.}
+}
+\value{
+A logical vector indicating whether each point location falls within a valid raster cell (FALSE) or not (TRUE).
 }
 \description{
-Identify whether point locations fall within valid raster cells
+This function checks whether point locations fall within valid (non-NA) cells of a raster layer.
+}
+\examples{
+\dontrun{
+library(raster)
+locs <- SpatialPointsDataFrame(coords = matrix(runif(10), ncol = 2), data = data.frame(id = 1:5))
+ras <- raster(matrix(runif(100), 10, 10))
+result <- point_in_cell(locs, ras)
+}
 }

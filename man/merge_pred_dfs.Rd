@@ -7,8 +7,19 @@
 merge_pred_dfs(files, CV = NULL)
 }
 \arguments{
-\item{files}{vector of full file path}
+\item{files}{A vector of full file paths to the prediction files.}
+
+\item{CV}{A character string specifying the cross-validation type. Options are "HB", "ML", or NULL. Default is NULL.}
+}
+\value{
+A list of data frames with the merged predictions.
 }
 \description{
-Merge summarised predictions across all models into single dataframes
+This function merges summarised predictions across all models into single dataframes.
+}
+\examples{
+\dontrun{
+files <- c("path/to/predictions1.rds", "path/to/predictions2.rds")
+merged_preds <- merge_pred_dfs(files)
+}
 }

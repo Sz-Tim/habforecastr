@@ -9,7 +9,7 @@ calc_ydayAvg(data_df, out_f, ...)
 \arguments{
 \item{data_df}{Dataframe}
 
-\item{out_f}{Output file}
+\item{out_f}{Output filename}
 
 \item{...}{Columns to group by}
 }

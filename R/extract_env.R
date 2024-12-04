@@ -1,10 +1,12 @@
 #' Find id of environmental layer points nearest to each site point location
 #'
-#' @param site.df
-#' @param env.sf
-#' @param id_env
+#' This function finds the ID of the environmental layer points that are nearest to each site point location.
 #'
-#' @return
+#' @param site.df A data frame with site locations, containing columns `lon` and `lat`.
+#' @param env.sf An `sf` object with environmental features.
+#' @param id_env A character string specifying the ID column in `env.sf`.
+#'
+#' @return A data frame with the nearest environmental feature IDs added.
 #' @export
 find_nearest_feature_id <- function(site.df, env.sf, id_env) {
   site.df |>
@@ -20,11 +22,13 @@ find_nearest_feature_id <- function(site.df, env.sf, id_env) {
 
 #' Find ids of environmental layer points within each site buffer
 #'
-#' @param site.sf
-#' @param env.sf
-#' @param id_env
+#' This function finds the IDs of environmental layer points that fall within each site buffer.
 #'
-#' @return
+#' @param site.sf An `sf` object with site quadrants.
+#' @param env.sf An `sf` object with environmental features.
+#' @param id_env A character string specifying the ID column in `env.sf`.
+#'
+#' @return A data frame with the intersecting environmental feature IDs added.
 #' @export
 find_buffer_intersect_ids <- function(site.sf, env.sf, id_env) {
   site.sf |>
@@ -39,13 +43,15 @@ find_buffer_intersect_ids <- function(site.sf, env.sf, id_env) {
 
 #' Extract CMEMS or WRF data to site point locations
 #'
-#' @param site.df
-#' @param env_vars
-#' @param env.df
-#' @param id_env
-#' @param site.v
+#' This function extracts CMEMS or WRF data to site point locations.
 #'
-#' @return
+#' @param site.df A data frame with site locations, containing columns `lon` and `lat`.
+#' @param env_vars A character vector specifying the column names of environmental variables.
+#' @param env.df A data frame of environmental variables.
+#' @param id_env A character string specifying the ID column in `env.df`.
+#' @param site.v A character string specifying the version for site alignment.
+#'
+#' @return A data frame with extracted environmental data for each site point location.
 #' @export
 extract_env_pts <- function(site.df, env_vars, env.df, id_env, site.v) {
   library(tidyverse); library(zoo)
@@ -85,13 +91,24 @@ extract_env_pts <- function(site.df, env_vars, env.df, id_env, site.v) {
 
 #' Extract CMEMS or WRF data within site buffer quadrants
 #'
-#' @param site.buffer
-#' @param vars
-#' @param env.df
-#' @param id_env
+#' This function extracts environmental data from CMEMS or WRF datasets within specified site buffer quadrants.
 #'
-#' @return
+#' @param site.buffer sf object with site quadrants.
+#' @param vars List containing column names for environmental variables. Should include `all` and optionally `sea`.
+#' @param env.df Data frame containing environmental data with a `date` column.
+#' @param id_env Character vector of column names in `site.buffer` used to match with `env.df`.
+#'
+#' @return A data frame with environmental data aggregated within site buffer quadrants.
 #' @export
+#' #'
+#' @examples
+#' \dontrun{
+#' site.buffer <- st_read("path/to/site_buffer.shp")
+#' vars <- list(all = c("temp", "salinity"), sea = c("sst"))
+#' env.df <- read.csv("path/to/env_data.csv")
+#' id_env <- c("siteid", "quadrant")
+#' result <- extract_env_buffers(site.buffer, vars, env.df, id_env)
+#' }
 extract_env_buffers <- function(site.buffer, vars, env.df, id_env) {
 
   library(tidyverse); library(zoo)

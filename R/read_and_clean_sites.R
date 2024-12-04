@@ -1,13 +1,21 @@
 # Read and clean sites
 
-#' Read and clean sites
 #'
-#' @param url_sites URL of site table in HABReports database
-#' @param dateStart Start date; ignores sites only operating before this
+#' This function reads and cleans site data from the HABReports database.
 #'
-#' @return data.frame with sin, east, north, and date
+#' @param url_sites A character string specifying the URL of the site table in the HABReports database.
+#' @param dateStart A Date object specifying the start date; sites operating only before this date will be ignored.
+#'
+#' @return A data frame with columns: sin, east, north, and date.
 #' @export
+#'
+#' @examples
+#' # Example usage:
+#' # url_sites <- "http://example.com/sites"
+#' # dateStart <- as.Date("2023-01-01")
+#' # read_and_clean_sites(url_sites, dateStart)
 read_and_clean_sites <- function(url_sites, dateStart) {
+  library(tidyverse)
   paste0(url_sites, "?fromdate=gte.", dateStart) |>
     url() |>
     readLines(warn=F) |>
@@ -33,16 +41,19 @@ read_and_clean_sites <- function(url_sites, dateStart) {
 
 
 
-#' Title
+#' Read and clean FSA data
 #'
-#' @param url_fsa
-#' @param hab_i
-#' @param sites
-#' @param dateStart
+#' This function reads and cleans FSA data from the specified URL.
 #'
-#' @return
+#' @param url_fsa A character string specifying the URL of the FSA data.
+#' @param hab_i A data frame containing information about HAB indices.
+#' @param sites A data frame containing site information.
+#' @param dateStart A character string specifying the start date (default is "2016-01-01").
+#'
+#' @return A cleaned data frame with columns: obsid, lon, lat, sin, date, and HAB indices.
 #' @export
 read_and_clean_fsa <- function(url_fsa, hab_i, sites, dateStart="2016-01-01") {
+  library(tidyverse)
   paste0(url_fsa, "?date_collected=gte.", dateStart) |>
     url() |>
     readLines(warn=F) |>
@@ -64,16 +75,19 @@ read_and_clean_fsa <- function(url_fsa, hab_i, sites, dateStart="2016-01-01") {
 }
 
 
-#' Title
+#' Read and clean CEFAS data
 #'
-#' @param url_cefas
-#' @param tox_i
-#' @param sites
-#' @param dateStart
+#' This function reads and cleans CEFAS data from the specified URL.
 #'
-#' @return
+#' @param url_cefas A character string specifying the URL of the CEFAS data.
+#' @param tox_i A data frame containing information about toxin indices.
+#' @param sites A data frame containing site information.
+#' @param dateStart A character string specifying the start date (default is "2016-01-01").
+#'
+#' @return A cleaned data frame with columns: obsid, lon, lat, sin, date, and toxin indices.
 #' @export
 read_and_clean_cefas <- function(url_cefas, tox_i, sites, dateStart="2016-01-01") {
+  library(tidyverse)
   paste0(url_cefas, "?date_collected=gte.", dateStart) |>
     url() |>
     readLines(warn=F) |>
@@ -98,17 +112,20 @@ read_and_clean_cefas <- function(url_cefas, tox_i, sites, dateStart="2016-01-01"
 }
 
 
-#' Title
+#' Read and clean fish data
 #'
-#' @param url_mowi
-#' @param url_ssf
-#' @param fish_i
-#' @param sites
-#' @param dateStart
+#' This function reads and cleans fish data from the specified URLs.
 #'
-#' @return
+#' @param url_mowi A character string specifying the URL of the MOWI data.
+#' @param url_ssf A character string specifying the URL of the SSF data.
+#' @param fish_i A data frame containing information about fish indices.
+#' @param sites A data frame containing site information.
+#' @param dateStart A character string specifying the start date (default is "2016-01-01").
+#'
+#' @return A cleaned data frame with columns: obsid, lon, lat, sin, date, and fish indices.
 #' @export
 read_and_clean_fish <- function(url_mowi, url_ssf, fish_i, sites, dateStart="2016-01-01") {
+  library(tidyverse)
   bind_rows(url(paste0(url_mowi, "?date_collected=gte.", dateStart)) |>
               readLines(warn=F) |>
               fromJSON() |> as_tibble(),

@@ -7,8 +7,26 @@
 detrend_loess(x, y, span = 0.75, robust = TRUE)
 }
 \arguments{
-\item{robust}{}
+\item{x}{A numeric vector representing the predictor variable.}
+
+\item{y}{A numeric vector representing the response variable.}
+
+\item{span}{A numeric value controlling the degree of smoothing. Default is 0.75.}
+
+\item{robust}{A logical value indicating whether to use robust fitting. Default is TRUE.}
+}
+\value{
+A numeric vector of residuals from the loess smoother.
 }
 \description{
-Detrend observations using a loess smoother
+This function calculates residuals from a loess smoother to detrend observations.
+}
+\examples{
+\dontrun{
+x <- 1:100
+y <- sin(x / 10) + rnorm(100)
+detrended_y <- detrend_loess(x, y, span = 0.5, robust = FALSE)
+plot(x, y)
+lines(x, detrended_y, col = "red")
+}
 }

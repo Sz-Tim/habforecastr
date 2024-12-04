@@ -7,8 +7,29 @@
 make_HB_priors(prior_i, mod, resp, covs, PCA = F)
 }
 \arguments{
-\item{covs}{}
+\item{prior_i}{A list containing the prior parameters.}
+
+\item{mod}{A character string specifying the model type.}
+
+\item{resp}{A character string specifying the response variable.}
+
+\item{covs}{A character vector of covariates to include in the model.}
+
+\item{PCA}{A logical value indicating whether to use principal component analysis (PCA). Default is FALSE.}
+}
+\value{
+A list of priors for the specified Hierarchical Bayesian model.
 }
 \description{
-Create priors for each Hierarchical Bayesian model
+This function creates priors for each Hierarchical Bayesian model based on the specified parameters.
+}
+\examples{
+\dontrun{
+library(brms)
+prior_i <- list(hs1 = 0.5, hs2 = 0.6, r1 = 0.2, r2 = 2)
+mod <- "HB"
+resp <- "lnN"
+covs <- c("cov1", "cov2", "cov3")
+priors <- make_HB_priors(prior_i, mod, resp, covs)
+}
 }

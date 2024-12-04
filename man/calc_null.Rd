@@ -7,8 +7,20 @@
 calc_null(obs.ls, resp)
 }
 \arguments{
-\item{resp}{}
+\item{obs.ls}{A list of data frames containing observations for different response variables.}
+
+\item{resp}{A character string specifying the response variable (e.g., `"alert"`, `"tl"`, `"lnN"`).}
+}
+\value{
+A list containing two data frames: `yday.df` with null model predictions for each day of the year, and `obs.df` with the original observations and corresponding null model predictions.
 }
 \description{
-Calculate null model predictions
+This function calculates null model predictions for different response variables by averaging observations within a specified time window.
+}
+\examples{
+\dontrun{
+library(tidyverse)
+obs.ls <- list(alert = data.frame(date = Sys.Date() - 1:10, alert = sample(c("A1", "A2"), 10, replace = TRUE)))
+result <- calc_null(obs.ls, "alert")
+}
 }

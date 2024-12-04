@@ -1,8 +1,9 @@
 #' Identify indexes for ML training
 #'
-#' @param data.df
+#' @param data.df Dataframe
 #'
-#' @return
+#' @return List of 2 lists where `i.in` gives the row indexes to include in
+#' each fold, and `i.out` gives the indexes to exclude in each fold.
 #' @export
 createFoldsByYear <- function(data.df) {
   folds_out <- data.df |> mutate(rowNum=row_number()) |>

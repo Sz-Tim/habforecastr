@@ -2,13 +2,22 @@
 % Please edit documentation in R/read_and_clean_sites.R
 \name{read_and_clean_fsa}
 \alias{read_and_clean_fsa}
-\title{Title}
+\title{Read and clean FSA data}
 \usage{
 read_and_clean_fsa(url_fsa, hab_i, sites, dateStart = "2016-01-01")
 }
 \arguments{
-\item{dateStart}{}
+\item{url_fsa}{A character string specifying the URL of the FSA data.}
+
+\item{hab_i}{A data frame containing information about HAB indices.}
+
+\item{sites}{A data frame containing site information.}
+
+\item{dateStart}{A character string specifying the start date (default is "2016-01-01").}
+}
+\value{
+A cleaned data frame with columns: obsid, lon, lat, sin, date, and HAB indices.
 }
 \description{
-Title
+This function reads and cleans FSA data from the specified URL.
 }

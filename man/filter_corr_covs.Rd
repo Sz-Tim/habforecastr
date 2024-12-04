@@ -7,8 +7,22 @@
 filter_corr_covs(all_covs, data.y, covsExclude = "NA")
 }
 \arguments{
-\item{covsExclude}{}
+\item{all_covs}{A list of all possible covariates.}
+
+\item{data.y}{A list of data frames containing the data for each response variable.}
+
+\item{covsExclude}{A character string specifying the covariates to exclude. Default is "NA".}
+}
+\value{
+A list of filtered covariates.
 }
 \description{
-Filter list of covariates following recipe thinning
+This function filters the list of covariates following recipe thinning.
+}
+\examples{
+\dontrun{
+all_covs <- list(main = c("cov1", "cov2"), interact = c("cov3", "cov4"), nonHB = c("cov5", "cov6"))
+data.y <- list(response1 = data.frame(cov1 = rnorm(10), cov2 = rnorm(10)), response2 = data.frame(cov3 = rnorm(10), cov4 = rnorm(10)))
+filtered_covs <- filter_corr_covs(all_covs, data.y)
+}
 }

@@ -1,17 +1,30 @@
 #' Wrapper to fit a model
 #'
-#' @param mod
-#' @param resp
-#' @param form.ls
-#' @param d.ls
-#' @param opts
-#' @param tunes
-#' @param out.dir
-#' @param y
-#' @param suffix
+#' This function fits a specified model to the data, including machine learning and hierarchical Bayesian models.
 #'
-#' @return
+#' @param mod A character string specifying the model to fit (e.g., `"Ridge"`, `"ENet"`, `"RF"`, `"NN"`, `"MARS"`, `"Boost"`, `"lgbm"`, `"HB"`).
+#' @param resp A character string specifying the response variable.
+#' @param form.ls A list of formulas for the models.
+#' @param d.ls A list of data frames for the models.
+#' @param opts A list of options for model fitting, including resampling and control parameters.
+#' @param tunes A list of tuning parameters for the models.
+#' @param out.dir A character string specifying the output directory for saving model results.
+#' @param y A character string specifying the target variable.
+#' @param suffix A character string specifying a suffix for the model ID. Default is `NULL`.
+#'
+#' @return None. Fitted object is stored.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidymodels)
+#' form.ls <- list(alert = list(ML = y ~ ., ML_PCA = y ~ .))
+#' d.ls <- list(alert = data.frame(y = factor(c("A1", "A2")), x1 = rnorm(2), x2 = rnorm(2)))
+#' opts <- vfold_cv(d.ls$alert, v = 5)
+#' tunes <- list(Ridge = 10, ENet = 10, RF = 10, NN = 10, MARS = 10, Boost = 10, lgbm = 10)
+#' out.dir <- "model_output"
+#' fit_candidate("Ridge", "alert", form.ls, d.ls, opts, tunes, out.dir, "y")
+#' }
 fit_candidate <- function(mod, resp, form.ls, d.ls, opts, tunes, out.dir, y, suffix=NULL) {
   library(glue); library(tidymodels)
   dir.create(glue("{out.dir}/meta/"), showWarnings=F, recursive=T)

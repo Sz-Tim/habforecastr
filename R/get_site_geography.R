@@ -1,12 +1,22 @@
 #' Find pairwise shortest in-ocean paths between sites
 #'
-#' @param ocean.path
-#' @param site.df
-#' @param transMx.path
-#' @param recalc_transMx
+#' This function calculates the pairwise shortest in-ocean paths between sites using a specified ocean raster.
 #'
-#' @return
+#' @param ocean.path A character string specifying the path to the ocean raster file.
+#' @param site.df A data frame containing site information, including longitude and latitude.
+#' @param transMx.path A character string specifying the path to save the transition matrix. Default is NULL.
+#' @param recalc_transMx A logical value indicating whether to recalculate the transition matrix. Default is FALSE.
+#' @param site_savePath A character string specifying the path to save the updated site data frame. Default is NULL.
+#'
+#' @return A list containing the updated site data frame and a data frame of pairwise shortest paths.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' ocean.path <- "path/to/ocean_raster.tif"
+#' site.df <- data.frame(siteid = 1:5, lon = runif(5, -10, 10), lat = runif(5, -10, 10))
+#' result <- get_shortestPaths(ocean.path, site.df)
+#' }
 get_shortestPaths <- function(ocean.path, site.df, site_savePath=NULL) {
   library(raster); library(gdistance);
   library(terra); library(spaths)
@@ -60,12 +70,22 @@ get_shortestPaths <- function(ocean.path, site.df, site_savePath=NULL) {
 
 #' Identify whether point locations fall within valid raster cells
 #'
-#' @param locs
-#' @param ras
-#' @param layer
+#' This function checks whether point locations fall within valid (non-NA) cells of a raster layer.
 #'
-#' @return
+#' @param locs A spatial object (e.g., `SpatialPointsDataFrame`) containing point locations.
+#' @param ras A raster object.
+#' @param layer An integer specifying the layer of the raster to check. Default is 1.
+#'
+#' @return A logical vector indicating whether each point location falls within a valid raster cell (FALSE) or not (TRUE).
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(raster)
+#' locs <- SpatialPointsDataFrame(coords = matrix(runif(10), ncol = 2), data = data.frame(id = 1:5))
+#' ras <- raster(matrix(runif(100), 10, 10))
+#' result <- point_in_cell(locs, ras)
+#' }
 point_in_cell <- function (locs, ras, layer=1) {
   # copied from rSDM since not available for newer R versions
   if (!isTRUE(raster::compareCRS(locs, ras))) {
@@ -82,17 +102,27 @@ point_in_cell <- function (locs, ras, layer=1) {
 
 
 
-#' Shift out-of-bounds pointsto nearest cell
+#' Shift out-of-bounds points to nearest cell
 #'
-#' @param locs
-#' @param ras
-#' @param layer
-#' @param move
-#' @param distance
-#' @param showchanges
+#' This function shifts point locations that fall outside valid raster cells to the nearest valid cell.
 #'
-#' @return
+#' @param locs A spatial object (e.g., `SpatialPointsDataFrame`) containing point locations.
+#' @param ras A raster object.
+#' @param layer An integer specifying the layer of the raster to check. Default is 1.
+#' @param move A logical value indicating whether to move the points to the nearest valid cell. Default is TRUE.
+#' @param distance A numeric value specifying the maximum distance to move points. Points farther than this distance will not be moved. Default is NULL.
+#' @param showchanges A logical value indicating whether to print the changes made. Default is TRUE.
+#'
+#' @return The modified spatial object with points shifted to the nearest valid raster cell.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(raster)
+#' locs <- SpatialPointsDataFrame(coords = matrix(runif(10), ncol = 2), data = data.frame(id = 1:5))
+#' ras <- raster(matrix(runif(100), 10, 10))
+#' result <- points2nearestcell(locs, ras)
+#' }
 points2nearestcell <- function (locs=NULL, ras=NULL, layer=1,
                                 move=T, distance=NULL, showchanges=T) {
   # copied from rSDM since not available for newer R versions
@@ -143,11 +173,22 @@ points2nearestcell <- function (locs=NULL, ras=NULL, layer=1,
 
 #' Extract fetch for each site point location
 #'
-#' @param site.df
-#' @param fetch.path
+#' This function extracts the fetch (distance over water) for each site point location from a specified raster file.
 #'
-#' @return
+#' @param site.df A data frame containing site information, including longitude and latitude.
+#' @param fetch.path A character string specifying the path to the fetch raster file.
+#'
+#' @return A data frame with the original site information and an additional column for fetch.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidyverse)
+#' library(sf)
+#' site.df <- data.frame(siteid = 1:5, lon = runif(5, -10, 10), lat = runif(5, -10, 10))
+#' fetch.path <- "path/to/fetch_raster.tif"
+#' result <- get_fetch(site.df, fetch.path)
+#' }
 get_fetch <- function(site.df, fetch.path) {
   library(tidyverse); library(sf)
   site.df |>
@@ -183,13 +224,24 @@ get_fetch <- function(site.df, fetch.path) {
 
 #' Identify most-open bearing for each site point location
 #'
-#' @param site.df
-#' @param coast.path
-#' @param buffer
-#' @param nDir
+#' This function identifies the most-open bearing (direction with the least obstruction) for each site point location based on a specified coastal path.
 #'
-#' @return
+#' @param site.df A data frame containing site information, including longitude and latitude.
+#' @param coast.path A character string specifying the path to the coastal shapefile.
+#' @param buffer A numeric value specifying the buffer distance around each site point. Default is 10,000 meters.
+#' @param nDir An integer specifying the number of directions to consider. Default is 120.
+#'
+#' @return A data frame with the original site information and an additional column for the most-open bearing.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidyverse)
+#' library(sf)
+#' site.df <- data.frame(siteid = 1:5, lon = runif(5, -10, 10), lat = runif(5, -10, 10))
+#' coast.path <- "path/to/coast_shapefile.shp"
+#' result <- get_openBearing(site.df, coast.path)
+#' }
 get_openBearing <- function(site.df, coast.path, buffer=10e3, nDir=120) {
   library(tidyverse); library(sf)
 

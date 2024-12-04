@@ -1,10 +1,21 @@
 #' Split circular buffer into NSEW quadrants
 #'
-#' @param sf
-#' @param radius
+#' This function splits a circular buffer into four quadrants: North, South, East, and West.
 #'
-#' @return
+#' @param sf An `sf` object representing the circular buffer.
+#' @param radius Numeric value specifying the radius of the buffer in meters. Default is 110,000 meters.
+#'
+#' @return An `sf` object with the circular buffer split into NSEW quadrants.
 #' @export
+#' #'
+#' @examples
+#' \dontrun{
+#' library(sf)
+#' # Create a sample sf object
+#' sf <- st_as_sf(data.frame(siteid = 1, geometry = st_sfc(st_point(c(0, 0)))), crs = 27700)
+#' # Split the buffer into quadrants
+#' quadrants <- split_to_NSEW(sf, radius = 110e3)
+#' }
 split_to_NSEW <- function(sf, radius=110e3) {
   library(tidyverse); library(sf); library(lwgeom)
   hub.df <- sf |>
@@ -39,14 +50,19 @@ split_to_NSEW <- function(sf, radius=110e3) {
 
 #' Lag multiple variables at once
 #'
-#' From https://stackoverflow.com/questions/55814028/multiple-lags-with-dplyr
+#' This function creates multiple lagged versions of specified variables in a data frame.
 #'
-#' @param data Dataframe
-#' @param ... Unquoted variable names to lag
-#' @param n Number of lags
+#' @param data A data frame.
+#' @param ... Unquoted variable names to lag.
+#' @param n An integer specifying the number of lags (default is 2).
 #'
-#' @return
+#' @return A data frame with the original variables and their lagged versions.
 #' @export
+#'
+#' @examples
+#' # Example usage:
+#' # df <- data.frame(time = 1:10, value = rnorm(10))
+#' # get_lags(df, value, n = 3)
 get_lags <- function(data, ..., n=2){
   library(tidyverse); library(rlang)
   variable <- enquos(...)
@@ -66,12 +82,29 @@ get_lags <- function(data, ..., n=2){
 
 #' Identify traffic light and alert status based on density/concentration
 #'
-#' @param y.df
-#' @param N
-#' @param tl_i
+#' This function assigns traffic light and alert statuses to each row in a data frame based on specified density or concentration thresholds.
 #'
-#' @return
+#' @param y.df A data frame containing the data to be evaluated.
+#' @param N A numeric vector representing the density or concentration values.
+#' @param tl_i A data frame containing the traffic light (`tl`), alert (`A`), abbreviation (`abbr`), and minimum threshold (`min_ge`) values.
+#'
+#' @return A data frame with additional columns for traffic light (`tl`) and alert status (`alert`).
 #' @export
+#' #'
+#' @examples
+#' \dontrun{
+#' y.df <- data.frame(y = c("A", "B", "C"), N = c(10, 20, 30))
+#' tl_i <- data.frame(tl = c("Green", "Yellow", "Red"), A = c("Low", "Medium", "High"), abbr = c("A", "B", "C"), min_ge = c(5, 15, 25))
+#' result <- get_trafficLights(y.df, y.df$N, tl_i)
+#' }
+get_trafficLights <- function(y.df, N, tl_i) {
+  library(tidyverse)
+  y.df |>
+    rowwise() |>
+    mutate(tl = tl_i$tl[max(which(y == tl_i$abbr & {{N}} >= tl_i$min_ge))],
+           alert = tl_i$A[max(which(y == tl_i$abbr & {{N}} >= tl_i$min_ge))]) |>
+    ungroup()
+}
 get_trafficLights <- function(y.df, N, tl_i) {
   library(tidyverse)
   y.df |>
@@ -87,13 +120,26 @@ get_trafficLights <- function(y.df, N, tl_i) {
 
 #' Calculate local and regional autoregressive terms for HAB and toxin observations
 #'
-#' @param yRaw.df
-#' @param y_i
-#' @param tl_i
-#' @param site.100km
+#' This function calculates local and regional autoregressive terms for Harmful Algal Bloom (HAB) and toxin observations.
 #'
-#' @return
+#' @param yRaw.df A data frame containing raw observations of HAB and toxins.
+#' @param y_i A data frame with information about the variables of interest, including abbreviations.
+#' @param tl_i A data frame containing traffic light (`tl`), alert (`A`), abbreviation (`abbr`), and minimum threshold (`min_ge`) values.
+#' @param site.100km A data frame with site information within a 100 km radius.
+#' @param dist.df A data frame containing distance information between sites. Default is `NULL`.
+#' @param forecastStart A character string specifying the start date for forecasting. Default is `"3000-01-01"`.
+#'
+#' @return A data frame with calculated autoregressive terms and additional features for each observation.
 #' @export
+#' #'
+#' @examples
+#' \dontrun{
+#' yRaw.df <- data.frame(siteid = rep(1:3, each = 10), date = rep(seq.Date(Sys.Date(), by = "day", length.out = 10), 3), N = rnorm(30))
+#' y_i <- data.frame(abbr = c("HAB", "Toxin"))
+#' tl_i <- data.frame(tl = c("Green", "Yellow", "Red"), A = c("Low", "Medium", "High"), abbr = c("HAB", "Toxin"), min_ge = c(0, 1, 2))
+#' dist.df <- data.frame(origins = rep(1:3, each = 3), dest_c = list(1:3, 1:3, 1:3))
+#' result <- calc_y_features(yRaw.df, y_i, tl_i, dist.df)
+#' }
 calc_y_features <- function(yRaw.df, y_i, tl_i, dist.df=NULL, forecastStart="3000-01-01") {
   y.ls <- yRaw.df |>
     group_by(siteid, date) |>
@@ -159,13 +205,28 @@ calc_y_features <- function(yRaw.df, y_i, tl_i, dist.df=NULL, forecastStart="300
 
 #' Summarise HAB states for each toxin observation
 #'
-#' @param site_tox.sf
-#' @param site_hab.sf
-#' @param tox.obs
-#' @param hab.df
+#' This function summarises Harmful Algal Bloom (HAB) states for each toxin observation by calculating the mean values of HAB-related variables within a specified time window.
 #'
-#' @return
+#' @param site_tox.sf An `sf` object representing the toxin observation sites.
+#' @param site_hab.sf An `sf` object representing the HAB observation sites.
+#' @param tox.obs A data frame containing toxin observations.
+#' @param hab.df A data frame containing HAB observations.
+#'
+#' @return A data frame with toxin observations and summarised HAB states.
 #' @export
+#' #'
+#' @examples
+#' \dontrun{
+#' library(sf)
+#' # Create sample sf objects for toxin and HAB sites
+#' site_tox.sf <- st_as_sf(data.frame(siteid = 1:3, geom = st_sfc(st_point(c(0, 0)), st_point(c(1, 1)), st_point(c(2, 2)))), crs = 4326)
+#' site_hab.sf <- st_as_sf(data.frame(siteid = 4:6, geom = st_sfc(st_point(c(0.5, 0.5)), st_point(c(1.5, 1.5)), st_point(c(2.5, 2.5)))), crs = 4326)
+#' # Create sample data frames for toxin and HAB observations
+#' tox.obs <- data.frame(siteid = 1:3, date = Sys.Date() - 1:3)
+#' hab.df <- data.frame(siteid = 4:6, date = Sys.Date() - 1:6, y = rep("HAB", 6), lnN = rnorm(6), alert = rep("A1", 6))
+#' # Summarise HAB states for each toxin observation
+#' result <- summarise_hab_states(site_tox.sf, site_hab.sf, tox.obs, hab.df)
+#' }
 summarise_hab_states <- function(site_tox.sf, site_hab.sf, tox.obs, hab.df) {
   library(tidyverse); library(sf)
 
@@ -201,15 +262,24 @@ summarise_hab_states <- function(site_tox.sf, site_hab.sf, tox.obs, hab.df) {
 
 #' Detrend observations using a loess smoother
 #'
-#' Calculates residuals from a loess smoother
+#' This function calculates residuals from a loess smoother to detrend observations.
 #'
-#' @param x
-#' @param y
-#' @param span
-#' @param robust
+#' @param x A numeric vector representing the predictor variable.
+#' @param y A numeric vector representing the response variable.
+#' @param span A numeric value controlling the degree of smoothing. Default is 0.75.
+#' @param robust A logical value indicating whether to use robust fitting. Default is TRUE.
 #'
-#' @return
+#' @return A numeric vector of residuals from the loess smoother.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' x <- 1:100
+#' y <- sin(x / 10) + rnorm(100)
+#' detrended_y <- detrend_loess(x, y, span = 0.5, robust = FALSE)
+#' plot(x, y)
+#' lines(x, detrended_y, col = "red")
+#' }
 detrend_loess <- function (x, y, span=0.75, robust=TRUE) {
   # modified from astsa::trend
   if(sum(!is.na(y)) < 10) {

@@ -7,8 +7,26 @@
 get_openBearing(site.df, coast.path, buffer = 10000, nDir = 120)
 }
 \arguments{
-\item{nDir}{}
+\item{site.df}{A data frame containing site information, including longitude and latitude.}
+
+\item{coast.path}{A character string specifying the path to the coastal shapefile.}
+
+\item{buffer}{A numeric value specifying the buffer distance around each site point. Default is 10,000 meters.}
+
+\item{nDir}{An integer specifying the number of directions to consider. Default is 120.}
+}
+\value{
+A data frame with the original site information and an additional column for the most-open bearing.
 }
 \description{
-Identify most-open bearing for each site point location
+This function identifies the most-open bearing (direction with the least obstruction) for each site point location based on a specified coastal path.
+}
+\examples{
+\dontrun{
+library(tidyverse)
+library(sf)
+site.df <- data.frame(siteid = 1:5, lon = runif(5, -10, 10), lat = runif(5, -10, 10))
+coast.path <- "path/to/coast_shapefile.shp"
+result <- get_openBearing(site.df, coast.path)
+}
 }

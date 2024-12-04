@@ -2,13 +2,19 @@
 
 #' Calculate J, F-1, precision, and recall for a dataframe
 #'
-#' This is a function to pass to future_map to avoid capturing large objects
-#' in the environment which makes it extraordinarily slow
+#' This function calculates the F1 score, precision, recall, and Matthews correlation coefficient (MCC) for a given dataframe. It is designed to be used with `future_map` to avoid capturing large objects in the environment, which can slow down the process.
 #'
-#' @param dat
+#' @param dat A dataframe containing the data to be evaluated.
 #'
-#' @return
+#' @return A tibble with the calculated metrics: F1 score, precision, recall, and MCC.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidyverse)
+#' dat <- tibble(alert = factor(c("A1", "A0", "A1", "A0")), pred = factor(c("A1", "A0", "A0", "A1")))
+#' metrics <- get_metrics(dat)
+#' }
 get_metrics <- function(dat) {
   tibble(F1=f_meas(dat, alert, pred, event_level="second")$.estimate,
          precision=precision(dat, alert, pred, event_level="second")$.estimate,
@@ -26,11 +32,26 @@ get_metrics <- function(dat) {
 
 #' Compute classification metrics across probability thresholds
 #'
-#' @param L.df
-#' @param prSteps
+#' This function computes classification metrics (F1 score, precision, recall, and MCC) across different probability thresholds.
 #'
-#' @return
+#' @param L.df A dataframe containing the data to be evaluated.
+#' @param prMin A numeric value specifying the minimum probability threshold. Default is 0.
+#' @param prMax A numeric value specifying the maximum probability threshold. Default is 1.
+#' @param prSteps A numeric value specifying the step size for probability thresholds. Default is 0.1.
+#' @param byPrevAlert A logical value indicating whether to group by previous alert status. Default is FALSE.
+#' @param cores An integer specifying the number of cores to use for parallel processing. Default is 1.
+#'
+#' @return A dataframe with the computed metrics for each probability threshold.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidyverse)
+#' library(yardstick)
+#' library(furrr)
+#' L.df <- tibble(alert = factor(c("A1", "A0", "A1", "A0")), prA1 = runif(4))
+#' metrics <- compute_thresholds(L.df)
+#' }
 compute_thresholds <- function(L.df, prMin=0, prMax=1, prSteps=0.1, byPrevAlert=F, cores=1) {
   library(tidyverse); library(yardstick); library(furrr)
   pred.df <- map_dfr(seq(prMin, prMax, by=prSteps),
@@ -66,13 +87,20 @@ compute_thresholds <- function(L.df, prMin=0, prMax=1, prSteps=0.1, byPrevAlert=
 
 #' Find minimum possible PR-AUC
 #'
-#' Following Boyd et al 2012
+#' This function calculates the minimum possible Area Under the Precision-Recall Curve (PR-AUC) following Boyd et al. 2012.
 #'
-#' @param df Dataframe
-#' @param ... Unquoted grouping variables
+#' @param df A dataframe containing the data to be evaluated.
+#' @param ... Unquoted grouping variables.
 #'
-#' @return
+#' @return A dataframe with the minimum possible PR-AUC added.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidyverse)
+#' df <- tibble(model = factor(c("model1", "model1", "model2", "model2")), alert = factor(c("A1", "A0", "A1", "A0")))
+#' df_with_aucpr_min <- find_AUCPR_min(df, model)
+#' }
 find_AUCPR_min <- function(df, ...) {
   df_aucpr_min <- df |>
     filter(model==levels(model)[1]) |>
@@ -94,13 +122,20 @@ find_AUCPR_min <- function(df, ...) {
 
 #' Calculate pseudo-R2s
 #'
-#' Currently supports McFadden and the Veall-Zimmermann correction of the Aldrich-Nelson pseudo-R2
+#' This function calculates pseudo-R2 values for logistic regression models. It currently supports McFadden and the Veall-Zimmermann correction of the Aldrich-Nelson pseudo-R2.
 #'
-#' @param dat.df
-#' @param type
+#' @param dat.df A dataframe containing the data to be evaluated.
+#' @param type A character string specifying the type of pseudo-R2 to calculate. Options are "mf" for McFadden and "vz" for Veall-Zimmermann. Default is "mf".
 #'
-#' @return
+#' @return A dataframe with the calculated pseudo-R2 values.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidyverse)
+#' dat.df <- tibble(alert = factor(c("A1", "A0", "A1", "A0")), prA1 = runif(4), model = factor(c("model1", "model1", "model2", "model2")), PCA = FALSE, covSet = "set1")
+#' r2_values <- calc_R2(dat.df)
+#' }
 calc_R2 <- function(dat.df, type="mf", ...) {
   # See Smith & McKenna. 2013. A comparison of logistic regression pseudo-R2
   #   indices. Multiple Linear Regression Viewpoints, 39(2)
@@ -135,14 +170,23 @@ calc_R2 <- function(dat.df, type="mf", ...) {
 
 
 
-#' Title
+#' Calculate credible intervals
 #'
-#' @param df
-#' @param y
-#' @param type
+#' This function calculates credible intervals for a given variable in a dataframe.
 #'
-#' @return
+#' @param df A dataframe containing the data to be evaluated.
+#' @param y A variable for which to calculate the credible intervals.
+#' @param type A character string specifying the type of credible interval to calculate. Options are "hdci" for highest density credible interval and "qi" for quantile interval. Default is "hdci".
+#'
+#' @return A dataframe with the calculated credible intervals.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidybayes)
+#' df <- tibble(y = rnorm(100))
+#' intervals <- get_intervals(df, y)
+#' }
 get_intervals <- function(df, y, type="hdci") {
   library(tidybayes)
 

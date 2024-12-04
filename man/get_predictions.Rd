@@ -7,8 +7,33 @@
 get_predictions(fit, mod, resp, d.df, y_i.i)
 }
 \arguments{
-\item{y_i.i}{}
+\item{fit}{A fitted model object.}
+
+\item{mod}{A character string specifying the model type.}
+
+\item{resp}{A character string specifying the response variable.}
+
+\item{d.df}{A data frame containing the data for prediction.}
+
+\item{y_i.i}{A data frame with information about the variables of interest.}
+}
+\value{
+A data frame with the generated predictions.
 }
 \description{
-Generate predictions for a model
+This function generates predictions for a given model and response variable.
+}
+\examples{
+\dontrun{
+library(tidyverse)
+library(glue)
+library(tidymodels)
+library(brms)
+fit <- brm(mpg ~ wt + cyl, data = mtcars)
+mod <- "HB"
+resp <- "mpg"
+d.df <- list(mpg = mtcars)
+y_i.i <- data.frame(abbr = "mpg")
+predictions <- get_predictions(fit, mod, resp, d.df, y_i.i)
+}
 }

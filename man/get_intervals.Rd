@@ -2,13 +2,27 @@
 % Please edit documentation in R/metrics.R
 \name{get_intervals}
 \alias{get_intervals}
-\title{Title}
+\title{Calculate credible intervals}
 \usage{
 get_intervals(df, y, type = "hdci")
 }
 \arguments{
-\item{type}{}
+\item{df}{A dataframe containing the data to be evaluated.}
+
+\item{y}{A variable for which to calculate the credible intervals.}
+
+\item{type}{A character string specifying the type of credible interval to calculate. Options are "hdci" for highest density credible interval and "qi" for quantile interval. Default is "hdci".}
+}
+\value{
+A dataframe with the calculated credible intervals.
 }
 \description{
-Title
+This function calculates credible intervals for a given variable in a dataframe.
+}
+\examples{
+\dontrun{
+library(tidybayes)
+df <- tibble(y = rnorm(100))
+intervals <- get_intervals(df, y)
+}
 }

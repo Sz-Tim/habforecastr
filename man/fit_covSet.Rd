@@ -2,7 +2,7 @@
 % Please edit documentation in R/fit_covSets.R
 \name{fit_covSet}
 \alias{fit_covSet}
-\title{Title}
+\title{Fit a subset of available covariates}
 \usage{
 fit_covSet(
   y_i,
@@ -17,8 +17,36 @@ fit_covSet(
 )
 }
 \arguments{
-\item{responses}{}
+\item{y_i}{A data frame with information about the variables of interest, including abbreviations.}
+
+\item{run_type}{A character string specifying the run type. Default is "0_init".}
+
+\item{covSet}{A list containing the covariate set information.}
+
+\item{mod}{A character string specifying the model to fit (e.g., "Ridge", "ENet", "RF", "NN", "MARS", "Boost", "lgbm", "HB").}
+
+\item{test_prop}{A numeric value specifying the proportion of data to use for testing. Default is 0.75.}
+
+\item{nTuneVal}{A numeric value specifying the number of tuning values. Default is 2.}
+
+\item{prior_strength}{A numeric value specifying the strength of the priors. Default is 1.}
+
+\item{ncores}{A numeric value specifying the number of cores to use for parallel processing. Default is 4.}
+
+\item{responses}{A character vector specifying the response variables. Default is c(alert = "alert").}
+}
+\value{
+None. Data, fitted objects, and logs are stored.
 }
 \description{
-Title
+This function subsets the available covariates, fitting a specified model with that subset.
+}
+\examples{
+\dontrun{
+library(tidymodels)
+y_i <- data.frame(abbr = c("HAB", "Toxin"))
+covSet <- list(id = "example", y = "HAB", prop_covs = 0.5, seed = 123)
+mod <- "Ridge"
+fit_covSet(y_i, run_type = "0_init", covSet, mod, test_prop = 0.75, nTuneVal = 2, prior_strength = 1, ncores = 4, responses = c(alert = "alert"))
+}
 }

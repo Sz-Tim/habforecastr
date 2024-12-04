@@ -2,18 +2,24 @@
 % Please edit documentation in R/read_and_clean_sites.R
 \name{read_and_clean_sites}
 \alias{read_and_clean_sites}
-\title{Read and clean sites}
+\title{This function reads and cleans site data from the HABReports database.}
 \usage{
 read_and_clean_sites(url_sites, dateStart)
 }
 \arguments{
-\item{url_sites}{URL of site table in HABReports database}
+\item{url_sites}{A character string specifying the URL of the site table in the HABReports database.}
 
-\item{dateStart}{Start date; ignores sites only operating before this}
+\item{dateStart}{A Date object specifying the start date; sites operating only before this date will be ignored.}
 }
 \value{
-data.frame with sin, east, north, and date
+A data frame with columns: sin, east, north, and date.
 }
 \description{
-Read and clean sites
+This function reads and cleans site data from the HABReports database.
+}
+\examples{
+# Example usage:
+# url_sites <- "http://example.com/sites"
+# dateStart <- as.Date("2023-01-01")
+# read_and_clean_sites(url_sites, dateStart)
 }

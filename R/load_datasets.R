@@ -1,10 +1,22 @@
 #' Load datasets for compilation
 #'
-#' @param sub.dir
-#' @param target
+#' This function loads and compiles various datasets for a specified target, including site data, observations, CMEMS data, WRF data, and additional environmental data.
 #'
-#' @return
+#' @param sub.dir A character string specifying the subdirectory where the data files are located.
+#' @param target A character string specifying the target dataset (e.g., "tox").
+#' @param ydayAvg.dir A character string specifying the directory where the year-day average data files are located.
+#'
+#' @return A list of data frames containing the compiled datasets.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(tidyverse)
+#' sub.dir <- "subdirectory"
+#' target <- "tox"
+#' ydayAvg.dir <- "ydayAvg_directory"
+#' datasets <- load_datasets(sub.dir, target, ydayAvg.dir)
+#' }
 load_datasets <- function(sub.dir, target, ydayAvg.dir) {
   d.ls <- list(
     site=readRDS(glue("data/site_{target}_df.rds")),

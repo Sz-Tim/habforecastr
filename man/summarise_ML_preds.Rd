@@ -7,8 +7,23 @@
 summarise_ML_preds(preds, resp, y_i.i)
 }
 \arguments{
-\item{y_i.i}{}
+\item{preds}{A data frame containing the predictions.}
+
+\item{resp}{A character string specifying the response variable.}
+
+\item{y_i.i}{A data frame with information about the variables of interest.}
+}
+\value{
+A data frame with the mean predictions.
 }
 \description{
-Calculate mean predictions for ML models
+This function calculates mean predictions for machine learning models.
+}
+\examples{
+\dontrun{
+preds <- tibble(.pred_A1 = runif(10))
+resp <- "alert"
+y_i.i <- data.frame(tl_thresh = "TL2", N_thresh = 1)
+mean_preds <- summarise_ML_preds(preds, resp, y_i.i)
+}
 }

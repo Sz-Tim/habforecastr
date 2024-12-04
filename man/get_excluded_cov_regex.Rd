@@ -7,8 +7,17 @@
 get_excluded_cov_regex(covSet)
 }
 \arguments{
-\item{covSet}{}
+\item{covSet}{A list containing the covariate set information.}
+}
+\value{
+A character string containing the regular expression for excluded covariates.
 }
 \description{
-Get regex for excluded covariates given a covariate set
+This function generates a regular expression for excluded covariates based on a specified covariate set.
+}
+\examples{
+\dontrun{
+covSet <- list(Avg = 0, Xf = 1, XN = 0, Del = 1)
+regex <- get_excluded_cov_regex(covSet)
+}
 }

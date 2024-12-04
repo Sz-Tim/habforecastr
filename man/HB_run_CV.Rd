@@ -19,8 +19,45 @@ HB_run_CV(
 )
 }
 \arguments{
-\item{priors}{}
+\item{mod}{A character string specifying the model to fit (e.g., "HB").}
+
+\item{folds}{A resampling object containing the cross-validation folds.}
+
+\item{cv.dir}{A character string specifying the directory to save cross-validation results.}
+
+\item{y}{A character string specifying the target variable.}
+
+\item{y_i.i}{A data frame with information about the variables of interest.}
+
+\item{r}{A character string specifying the response variable.}
+
+\item{form.ls}{A list of formulas for the models.}
+
+\item{HB.i}{A list of options for the hierarchical Bayesian model.}
+
+\item{priors}{A list of priors for the Bayesian model.}
+
+\item{PCA}{A logical value indicating whether to use principal component analysis (PCA). Default is FALSE.}
+
+\item{reverse}{A logical value indicating whether to reverse the order of the folds. Default is FALSE.}
+}
+\value{
+None. The function saves the cross-validation results to the specified directory.
 }
 \description{
-Run cross-validation for Bayesian models
+This function performs cross-validation for Bayesian models, fitting the model to training data and evaluating it on test data for each fold.
+}
+\examples{
+\dontrun{
+library(tidymodels)
+folds <- vfold_cv(mtcars, v = 5)
+cv.dir <- "path/to/cv_results"
+y <- "mpg"
+y_i.i <- data.frame(variable = "mpg")
+r <- "response"
+form.ls <- list(response = mpg ~ wt + cyl)
+HB.i <- list(iter = 1000, warmup = 500, chains = 4)
+priors <- list(prior(normal(0, 1), class = "b"))
+HB_run_CV("HB", folds, cv.dir, y, y_i.i, r, form.ls, HB.i, priors)
+}
 }

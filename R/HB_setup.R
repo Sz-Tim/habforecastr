@@ -1,13 +1,22 @@
 
 
 #' Create formulas for Hierarchical Bayesian models
+#' This function creates formulas for Hierarchical Bayesian models, incorporating specified covariates and spline interactions.
 #'
-#' @param resp
-#' @param covs
-#' @param splinesInt
+#' @param resp A character string specifying the response variable.
+#' @param covs A character vector of covariates to include in the model.
+#' @param splinesInt A character string specifying the type of spline interactions to include. Options are "time", "space", or "both". Default is "both".
 #'
-#' @return
+#' @return A `brmsformula` object for the specified Hierarchical Bayesian model.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(brms)
+#' resp <- "lnN"
+#' covs <- c("cov1", "cov2", "cov3")
+#' formula <- make_HB_formula(resp, covs, splinesInt = "both")
+#' }
 make_HB_formula <- function(resp, covs, splinesInt="both") {
   library(tidyverse); library(brms); library(glue)
 
@@ -39,13 +48,26 @@ make_HB_formula <- function(resp, covs, splinesInt="both") {
 
 #' Create priors for each Hierarchical Bayesian model
 #'
-#' @param prior_i
-#' @param mod
-#' @param resp
-#' @param covs
+#' This function creates priors for each Hierarchical Bayesian model based on the specified parameters.
 #'
-#' @return
+#' @param prior_i A list containing the prior parameters.
+#' @param mod A character string specifying the model type.
+#' @param resp A character string specifying the response variable.
+#' @param covs A character vector of covariates to include in the model.
+#' @param PCA A logical value indicating whether to use principal component analysis (PCA). Default is FALSE.
+#'
+#' @return A list of priors for the specified Hierarchical Bayesian model.
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(brms)
+#' prior_i <- list(hs1 = 0.5, hs2 = 0.6, r1 = 0.2, r2 = 2)
+#' mod <- "HB"
+#' resp <- "lnN"
+#' covs <- c("cov1", "cov2", "cov3")
+#' priors <- make_HB_priors(prior_i, mod, resp, covs)
+#' }
 make_HB_priors <- function(prior_i, mod, resp, covs, PCA=F) {
   library(tidyverse); library(brms)
   p <- c(prior(normal(0, 1), class="Intercept"),

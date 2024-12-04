@@ -7,10 +7,20 @@
 find_AUCPR_min(df, ...)
 }
 \arguments{
-\item{df}{Dataframe}
+\item{df}{A dataframe containing the data to be evaluated.}
 
-\item{...}{Unquoted grouping variables}
+\item{...}{Unquoted grouping variables.}
+}
+\value{
+A dataframe with the minimum possible PR-AUC added.
 }
 \description{
-Following Boyd et al 2012
+This function calculates the minimum possible Area Under the Precision-Recall Curve (PR-AUC) following Boyd et al. 2012.
+}
+\examples{
+\dontrun{
+library(tidyverse)
+df <- tibble(model = factor(c("model1", "model1", "model2", "model2")), alert = factor(c("A1", "A0", "A1", "A0")))
+df_with_aucpr_min <- find_AUCPR_min(df, model)
+}
 }

@@ -7,8 +7,15 @@
 find_nearest_feature_id(site.df, env.sf, id_env)
 }
 \arguments{
-\item{id_env}{}
+\item{site.df}{A data frame with site locations, containing columns `lon` and `lat`.}
+
+\item{env.sf}{An `sf` object with environmental features.}
+
+\item{id_env}{A character string specifying the ID column in `env.sf`.}
+}
+\value{
+A data frame with the nearest environmental feature IDs added.
 }
 \description{
-Find id of environmental layer points nearest to each site point location
+This function finds the ID of the environmental layer points that are nearest to each site point location.
 }

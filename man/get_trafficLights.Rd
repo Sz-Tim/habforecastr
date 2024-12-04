@@ -7,8 +7,22 @@
 get_trafficLights(y.df, N, tl_i)
 }
 \arguments{
-\item{tl_i}{}
+\item{y.df}{A data frame containing the data to be evaluated.}
+
+\item{N}{A numeric vector representing the density or concentration values.}
+
+\item{tl_i}{A data frame containing the traffic light (`tl`), alert (`A`), abbreviation (`abbr`), and minimum threshold (`min_ge`) values.}
+}
+\value{
+A data frame with additional columns for traffic light (`tl`) and alert status (`alert`).
 }
 \description{
-Identify traffic light and alert status based on density/concentration
+This function assigns traffic light and alert statuses to each row in a data frame based on specified density or concentration thresholds.
+}
+\examples{
+\dontrun{
+y.df <- data.frame(y = c("A", "B", "C"), N = c(10, 20, 30))
+tl_i <- data.frame(tl = c("Green", "Yellow", "Red"), A = c("Low", "Medium", "High"), abbr = c("A", "B", "C"), min_ge = c(5, 15, 25))
+result <- get_trafficLights(y.df, y.df$N, tl_i)
+}
 }

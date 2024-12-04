@@ -7,8 +7,19 @@
 extract_env_pts(site.df, env_vars, env.df, id_env, site.v)
 }
 \arguments{
-\item{site.v}{}
+\item{site.df}{A data frame with site locations, containing columns `lon` and `lat`.}
+
+\item{env_vars}{A character vector specifying the column names of environmental variables.}
+
+\item{env.df}{A data frame of environmental variables.}
+
+\item{id_env}{A character string specifying the ID column in `env.df`.}
+
+\item{site.v}{A character string specifying the version for site alignment.}
+}
+\value{
+A data frame with extracted environmental data for each site point location.
 }
 \description{
-Extract CMEMS or WRF data to site point locations
+This function extracts CMEMS or WRF data to site point locations.
 }
