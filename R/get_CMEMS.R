@@ -53,7 +53,7 @@ get_CMEMS <- function(userid, pw, i.df, bbox, nDays_buffer, dateRng, out.dir,
                     seconds=dseconds,
                     minutes=dminutes,
                     hours=dhours)
-    nc.date <- date(nc.origin + nc.dt(nc.time))
+    nc.date <- lubridate::date(nc.origin + nc.dt(nc.time))
     lon_i <- which(between(nc.lon, bbox$xmin, bbox$xmax))
     lat_i <- which(between(nc.lat, bbox$ymin, bbox$ymax))
     time_i <- which(between(nc.date, dateRng[1]-nDays_buffer, dateRng[2]+nDays_buffer))
