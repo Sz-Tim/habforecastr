@@ -138,11 +138,14 @@ read_and_clean_fish <- function(url_mowi, url_ssf, fish_i, sites, dateStart="201
     mutate(across(any_of(fish_i$full), ~na_if(.x, -99))) |>
     group_by(sin) |> mutate(N=n()) |> ungroup() |> filter(N > 2) |>
     select(oid, sin, date, easting, northing, any_of(fish_i$full)) |>
+    mutate(easting=if_else(easting==0 & northing==0, NA_real_, easting),
+           northing=if_else(easting==0 & northing==0, NA_real_, northing)) |>
     left_join(sites, by=c("sin", "date")) |>
     mutate(east=if_else(is.na(east), easting, east),
            north=if_else(is.na(north), northing, north)) |>
     rename(obsid=oid) |>
-    group_by(sin) |> mutate(lon=median(east), lat=median(north)) |> ungroup() |>
+    group_by(sin) |> mutate(lon=median(east, na.rm=T), lat=median(north, na.rm=T)) |> ungroup() |>
+    filter(!is.na(lon)) |>
     rename(any_of(setNames(fish_i$full, fish_i$abbr))) |>
     select(obsid, lon, lat, sin, date, any_of(fish_i$abbr)) |>
     arrange(sin, date) |>
