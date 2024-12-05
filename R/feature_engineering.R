@@ -105,14 +105,6 @@ get_trafficLights <- function(y.df, N, tl_i) {
            alert = tl_i$A[max(which(y == tl_i$abbr & {{N}} >= tl_i$min_ge))]) |>
     ungroup()
 }
-get_trafficLights <- function(y.df, N, tl_i) {
-  library(tidyverse)
-  y.df |>
-    rowwise() |>
-    mutate(tl=tl_i$tl[max(which(y==tl_i$abbr & {{N}} >= tl_i$min_ge))],
-           alert=tl_i$A[max(which(y==tl_i$abbr & {{N}} >= tl_i$min_ge))]) |>
-    ungroup()
-}
 
 
 
