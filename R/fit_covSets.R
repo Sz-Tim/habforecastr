@@ -104,7 +104,9 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, train_prop=0.75,
     select(where(~any(!is.na(.x)))) |>
     drop_na()
   if(n_distinct(obs.ls$alert)==1) {
-    cat("No alerts for", y.i, format(min(obs.ls$date), "%F"), "to", format(max(obs.ls$date), "%F"))
+    cat("No alerts for", y.i, "!\n",
+        "  Data range:", format(min(obs.ls$date), "%F"), "to", format(max(obs.ls$date), "%F"), "\n",
+        "  Skipping and moving to next row of covSet.df\n")
     return()
   }
 
