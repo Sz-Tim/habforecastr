@@ -135,7 +135,11 @@ read_and_clean_fish <- function(url_mowi, url_ssf, fish_i, sites, dateStart="201
     filter(!is.na(date_collected)) |>
     mutate(datetime_collected=as_datetime(date_collected),
            date=lubridate::date(datetime_collected)) |>
-    mutate(across(any_of(fish_i$full), ~na_if(.x, -99))) |>
+    mutate(across(any_of(fish_i$full), ~if_else(is.na(.x) | .x < 0, 0, .x))) |>
+    rowwise() |>
+    mutate(TOTAL=sum(c_across(any_of(fish_i$full)))) |>
+    ungroup() |>
+    filter(TOTAL > 0) |>
     group_by(sin) |> mutate(N=n()) |> ungroup() |> filter(N > 2) |>
     select(oid, sin, date, easting, northing, any_of(fish_i$full)) |>
     mutate(easting=if_else(easting==0 & northing==0, NA_real_, easting),
@@ -151,5 +155,6 @@ read_and_clean_fish <- function(url_mowi, url_ssf, fish_i, sites, dateStart="201
     arrange(sin, date) |>
     filter(sin!=0) |>
     group_by(date, sin) |>
-    summarise(across(where(is.numeric), ~mean(.x, na.rm=T)))
-}
+    summarise(across(where(is.numeric), ~mean(.x, na.rm=T))) |>
+    ungroup()
+  }
