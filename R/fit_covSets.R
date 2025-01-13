@@ -103,6 +103,11 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, train_prop=0.75,
     ungroup() |>
     select(where(~any(!is.na(.x)))) |>
     drop_na()
+  if(n_distinct(obs.ls$alert)==1) {
+    cat("No alerts for", y.i, format(min(obs.ls$date), "%F"), "to", format(max(obs.ls$date), "%F"))
+    return()
+  }
+
 
   set.seed(1003)
   if(train_prop < 1) {
@@ -120,6 +125,7 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, train_prop=0.75,
 
   # rebalance training data using SMOTE to rebalance_thresh
   prop_alert <- mean(obs.train$alert == "A1")
+  set.seed(1003)
   if(prop_alert < rebalance_thresh) {
     obs.train <- rebalance_smote(obs.train, dup_size=rebalance_thresh/prop_alert)
   }
