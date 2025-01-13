@@ -140,7 +140,7 @@ knearest <- function(D, P, n_clust) {
   }
 
   # Find the k-nearest neighbors using the FNN package
-  knD <- FNN::knnx.index(D, P, k = (n_clust + 1), algo = "kd_tree")
+  knD <- FNN::knnx.index(D, P, k = (n_clust + 1), algorithm = "kd_tree")
 
   # Remove self-references (where a point is its own nearest neighbor)
   knD <- knD * (knD != row(knD))

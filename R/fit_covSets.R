@@ -9,11 +9,12 @@
 #' @param run_type A character string specifying the run type. Default is "0_init".
 #' @param covSet A list containing the covariate set information.
 #' @param mod A character string specifying the model to fit (e.g., "Ridge", "ENet", "RF", "NN", "MARS", "Boost", "lgbm", "HB").
-#' @param test_prop A numeric value specifying the proportion of data to use for testing. Default is 0.75.
+#' @param train_prop A numeric value specifying the proportion of data to use for training. Default is 0.75.
 #' @param nTuneVal A numeric value specifying the number of tuning values. Default is 2.
 #' @param prior_strength A numeric value specifying the strength of the priors. Default is 1.
 #' @param ncores A numeric value specifying the number of cores to use for parallel processing. Default is 4.
 #' @param responses A character vector specifying the response variables. Default is c(alert = "alert").
+#' @param rebalance_thresh Imbalance threshold determining whether to rebalance the training data using Synthetic Minority Oversampling TEchnique (SMOTE). If the proportion of alerts is less than the threshold, the training data will be rebalanced to the threshold. Default is 0, resulting in no rebalancing.
 #'
 #' @return None. Data, fitted objects, and logs are stored.
 #' @export
@@ -24,11 +25,11 @@
 #' y_i <- data.frame(abbr = c("HAB", "Toxin"))
 #' covSet <- list(id = "example", y = "HAB", prop_covs = 0.5, seed = 123)
 #' mod <- "Ridge"
-#' fit_covSet(y_i, run_type = "0_init", covSet, mod, test_prop = 0.75, nTuneVal = 2, prior_strength = 1, ncores = 4, responses = c(alert = "alert"))
+#' fit_covSet(y_i, run_type = "0_init", covSet, mod, train_prop = 0.75, nTuneVal = 2, prior_strength = 1, ncores = 4, responses = c(alert = "alert"))
 #' }
-fit_covSet <- function(y_i, run_type="0_init", covSet, mod, test_prop=0.75,
+fit_covSet <- function(y_i, run_type="0_init", covSet, mod, train_prop=0.75,
                        nTuneVal=2, prior_strength=1, ncores=4,
-                       responses=c(alert="alert")) {
+                       responses=c(alert="alert"), rebalance_thresh=0) {
 
   # covariate set / response info
   id <- covSet$id
@@ -79,7 +80,10 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, test_prop=0.75,
                     paste("lnNWt1", c(all_covs$hab), sep="X"))
   # Randomly select covariate subset
   set.seed(covSet$seed)
-  if(y_i.i$type=="hab") {
+  if(grepl("fish", y_i.i$type)) {
+    all_covs <- map(all_covs, ~grep("PrevYr", .x, value=TRUE, invert=TRUE))
+  }
+  if(grepl("hab", y_i.i$type)) {
     covs_exclude <- unlist(all_covs[2:3], use.names=F) %>%
       sample(x=., size=floor(length(.)*(1-covSet$prop_covs)), replace=F)
   } else {
@@ -101,8 +105,12 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, test_prop=0.75,
     drop_na()
 
   set.seed(1003)
-  if(test_prop > 0) {
-    obs.split <- group_initial_split(obs.ls, group=year, prop=test_prop)
+  if(train_prop < 1) {
+    if(grepl("fish", y_i.i$type)) {
+      obs.split <- group_initial_split(obs.ls, group=siteid, prop=train_prop)
+    } else {
+      obs.split <- group_initial_split(obs.ls, group=year, prop=train_prop)
+    }
     saveRDS(obs.split, glue("{data.dir}/compiled/{y.i}_{id}_dataSplit.rds"))
     obs.train <- training(obs.split)
     obs.test <- testing(obs.split)
@@ -110,17 +118,23 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, test_prop=0.75,
     obs.train <- obs.ls
   }
 
+  # rebalance training data using SMOTE to rebalance_thresh
+  prop_alert <- mean(obs.train$alert == "A1")
+  if(prop_alert < rebalance_thresh) {
+    obs.train <- rebalance_smote(obs.train, dup_size=rebalance_thresh/prop_alert)
+  }
+
   # prepare dataset
   prep.ls <- map(responses, ~prep_recipe(obs.train, .x, covs_exclude))
   prepPCA.ls <- map(responses, ~prep_recipe(obs.train, .x, covs_exclude, TRUE))
   d.y <- list(train=map(prep.ls, ~bake(.x, obs.train)))
   dPCA.y <- list(train=map(prepPCA.ls, ~bake(.x, obs.train)))
-  if(test_prop > 0) {
+  if(train_prop < 1) {
     d.y$test <- map(prep.ls, ~bake(.x, obs.test))
     dPCA.y$test <- map(prepPCA.ls, ~bake(.x, obs.test))
   }
-  saveRDS(d.y, glue("{data.dir}/compiled/{y.i}_{id}_dy_testPct-{test_prop}.rds"))
-  saveRDS(dPCA.y, glue("{data.dir}/compiled/{y.i}_{id}_dPCAy_testPct-{test_prop}.rds"))
+  saveRDS(d.y, glue("{data.dir}/compiled/{y.i}_{id}_dy_testPct-{train_prop}.rds"))
+  saveRDS(dPCA.y, glue("{data.dir}/compiled/{y.i}_{id}_dPCAy_testPct-{train_prop}.rds"))
   covs <- filter_corr_covs(all_covs, d.y) |> map(~.x[! .x %in% covs_exclude])
   covsPCA <- names(dPCA.y$train[[1]] |> select(starts_with("PC")))
 

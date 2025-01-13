@@ -9,11 +9,12 @@ fit_covSet(
   run_type = "0_init",
   covSet,
   mod,
-  test_prop = 0.75,
+  train_prop = 0.75,
   nTuneVal = 2,
   prior_strength = 1,
   ncores = 4,
-  responses = c(alert = "alert")
+  responses = c(alert = "alert"),
+  rebalance_thresh = 0
 )
 }
 \arguments{
@@ -25,7 +26,7 @@ fit_covSet(
 
 \item{mod}{A character string specifying the model to fit (e.g., "Ridge", "ENet", "RF", "NN", "MARS", "Boost", "lgbm", "HB").}
 
-\item{test_prop}{A numeric value specifying the proportion of data to use for testing. Default is 0.75.}
+\item{train_prop}{A numeric value specifying the proportion of data to use for training. Default is 0.75.}
 
 \item{nTuneVal}{A numeric value specifying the number of tuning values. Default is 2.}
 
@@ -34,6 +35,8 @@ fit_covSet(
 \item{ncores}{A numeric value specifying the number of cores to use for parallel processing. Default is 4.}
 
 \item{responses}{A character vector specifying the response variables. Default is c(alert = "alert").}
+
+\item{rebalance_thresh}{Imbalance threshold determining whether to rebalance the training data using Synthetic Minority Oversampling TEchnique (SMOTE). If the proportion of alerts is less than the threshold, the training data will be rebalanced to the threshold. Default is 0, resulting in no rebalancing.}
 }
 \value{
 None. Data, fitted objects, and logs are stored.
@@ -47,6 +50,6 @@ library(tidymodels)
 y_i <- data.frame(abbr = c("HAB", "Toxin"))
 covSet <- list(id = "example", y = "HAB", prop_covs = 0.5, seed = 123)
 mod <- "Ridge"
-fit_covSet(y_i, run_type = "0_init", covSet, mod, test_prop = 0.75, nTuneVal = 2, prior_strength = 1, ncores = 4, responses = c(alert = "alert"))
+fit_covSet(y_i, run_type = "0_init", covSet, mod, train_prop = 0.75, nTuneVal = 2, prior_strength = 1, ncores = 4, responses = c(alert = "alert"))
 }
 }
