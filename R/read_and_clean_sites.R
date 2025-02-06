@@ -158,3 +158,17 @@ read_and_clean_fish <- function(url_mowi, url_ssf, fish_i, sites, dateStart="201
     summarise(across(where(is.numeric), ~mean(.x, na.rm=T))) |>
     ungroup()
   }
+
+
+
+
+read_and_clean_monitoring_data <- function(i, urls, targ_i, sites, dateStart) {
+  if(i == "hab") {
+    dat.df <- read_and_clean_fsa(urls$fsa, targ_i$hab, sites, dateStart)
+  } else if(i == "tox") {
+    dat.df <- read_and_clean_cefas(urls$cefas, targ_i$tox, sites, dateStart)
+  } else if(i == "habfish") {
+    dat.df <- read_and_clean_fish(urls$mowi, urls$ssf, targ_i$fish, sites, dateStart)
+  }
+  return(dat.df)
+}
