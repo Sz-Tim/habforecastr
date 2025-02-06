@@ -162,6 +162,18 @@ read_and_clean_fish <- function(url_mowi, url_ssf, fish_i, sites, dateStart="201
 
 
 
+#' Read and clean monitoring data
+#'
+#' Wrapper for other read_and_clean functions
+#'
+#' @param i Monitoring target type: "hab", "tox", or "habfish"
+#' @param urls named list of urls
+#' @param targ_i named list of target info
+#' @param sites monitoring sites from read_and_clean_sites()
+#' @param dateStart ymd start date
+#'
+#' @return Dataframe with corresponding monitoring data
+#' @export
 read_and_clean_monitoring_data <- function(i, urls, targ_i, sites, dateStart) {
   if(i == "hab") {
     dat.df <- read_and_clean_fsa(urls$fsa, targ_i$hab, sites, dateStart)
