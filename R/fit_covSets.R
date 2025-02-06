@@ -103,13 +103,6 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, train_prop=0.75,
     ungroup() |>
     select(where(~any(!is.na(.x)))) |>
     drop_na()
-  if(n_distinct(obs.ls$alert)==1) {
-    cat("No alerts for", y.i, "!\n",
-        "  Data range:", format(min(obs.ls$date), "%F"), "to", format(max(obs.ls$date), "%F"), "\n",
-        "  Skipping and moving to next row of covSet.df\n")
-    return()
-  }
-
 
   set.seed(1003)
   if(train_prop < 1) {
@@ -123,6 +116,14 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, train_prop=0.75,
     obs.test <- testing(obs.split)
   } else {
     obs.train <- obs.ls
+  }
+
+  if(n_distinct(obs.train$alert)==1) {
+    cat("No alerts in training data for", y.i, "!\n",
+        "  Data range:", format(min(obs.ls$date), "%F"), "to", format(max(obs.ls$date), "%F"), "\n",
+        "  Removing dataSplit and moving to next row of covSet.df\n")
+    file.remove(glue("{data.dir}/compiled/{y.i}_{id}_dataSplit.rds"))
+    return()
   }
 
   # rebalance training data using SMOTE to rebalance_thresh
