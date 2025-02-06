@@ -220,7 +220,7 @@ merge_pred_dfs <- function(files, CV=NULL) {
                   mutate(model=paste0(covSet, model)) |>
                   select(-covSet) |>
                   pivot_wider(names_from="model", values_from="prA1")) |>
-      map(~reduce(.x, full_join))
+      map(~reduce(.x, full_join, by=join_by(y, obsid)))
   } else if(CV=="HB") {
     map_dfr(1:nrow(f.df),
             ~readRDS(f.df$f[.x]) |> mutate(covSet=paste0(f.df$covSet[.x], "."))) |>
@@ -237,7 +237,7 @@ merge_pred_dfs <- function(files, CV=NULL) {
           mutate(model=paste0(covSet, model)) |>
           select(-covSet) |>
           pivot_wider(names_from="model", values_from="prA1")) |>
-      reduce(full_join)
+      reduce(full_join, by=join_by(y, obsid))
   } else {
     stop("CV must be 'HB', 'ML', or NULL")
   }
