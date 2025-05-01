@@ -1,6 +1,37 @@
 # Read and clean sites
 
+
+#' This function downloads site data from the HABReports database.
 #'
+#' @param url_sites A character string specifying the URL of the site table in the HABReports database.
+#' @param dateStart A Date object specifying the start date; sites operating only before this date will be ignored.
+#'
+#' @return A data frame with columns: sin, site, area, farm_species, east, north, fromdate, and todate.
+#' @export
+#'
+#' @examples
+#' # Example usage:
+#' # url_sites <- "http://example.com/sites"
+#' # dateStart <- as.Date("2023-01-01")
+#' # download_site_info(url_sites, dateStart)
+download_site_info <- function(url_sites, dateStart) {
+  library(tidyverse)
+  paste0(url_sites, "?fromdate=gte.", dateStart) |>
+    url() |>
+    readLines(warn=F) |>
+    fromJSON() |> as_tibble() |>
+    filter(east < 7e5 &
+             north < 125e4 &
+             !(east==0 & north==0) &
+             sin != "-99" &
+             !is.na(fromdate) & !is.na(todate) &
+             fromdate != todate) |>
+    mutate(fromdate=lubridate::date(fromdate), todate=lubridate::date(todate)) |>
+    arrange(sin, fromdate) |>
+    select(sin, site, area, farm_species, east, north, fromdate, todate) |>
+    arrange(sin, fromdate)
+}
+
 #' This function reads and cleans site data from the HABReports database.
 #'
 #' @param url_sites A character string specifying the URL of the site table in the HABReports database.
