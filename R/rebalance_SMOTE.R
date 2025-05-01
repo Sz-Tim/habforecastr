@@ -105,7 +105,7 @@ rebalance_smote <- function (og_df, K = 5, dup_size = 0) {
            alert2 = round(alert2) |> factor(levels = c(1, 2), labels = levels(og_df$alert2)),
            tl = round(tl) |> factor(levels = seq_along(levels(og_df$tl)), labels = levels(og_df$tl), ordered = TRUE),
            y = og_df$y[1],
-           obsid = 10000 + row_number())
+           obsid = -row_number())
 
   # Combine the original and synthetic data
   return(bind_rows(og_df, syn_df))
