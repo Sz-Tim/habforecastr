@@ -170,6 +170,53 @@ calc_R2 <- function(dat.df, type="mf", ...) {
 
 
 
+
+
+#' Schoener's D calculation that deals with NAs better
+#'
+#' @param d1
+#' @param d2
+#' @param a
+#' @param b
+#'
+#' @return
+#' @export
+#'
+#' @examples
+schoenr_alt <- function(d1, d2, a = NULL, b = NULL)
+{
+
+  if(sum(!is.na(d1)) < 2 | sum(!is.na(d2)) < 2) {
+    return(NA_real_)
+  }
+  if (min(d1$x) > max(d2$x) | max(d1$x) < min(d2$x)) {
+    return(0)
+  }
+  kerneval::schoenr(d1, d2, a, b)
+}
+
+
+
+#' Density calculation to deal with NAs better
+#'
+#' @param x
+#'
+#' @return
+#' @export
+#'
+#' @examples
+density_alt <- function(x) {
+  x_ <- x[!is.na(x)]
+  if(length(x_) < 2) {
+    NA_real_
+  } else {
+    density(x_)
+  }
+}
+
+
+
+
 #' Calculate credible intervals
 #'
 #' This function calculates credible intervals for a given variable in a dataframe.
