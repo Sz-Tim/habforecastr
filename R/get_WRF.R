@@ -27,6 +27,7 @@ get_WRF <- function(wrf.dir, nDays_buffer, dateRng, out.dir, forecast=F) {
   library(tidyverse); library(ncdf4); library(lubridate); library(glue);
   library(xml2); library(rvest)
   dir.create(out.dir, showWarnings=F)
+  days_requested <- seq(dateRng[1]-nDays_buffer, dateRng[2]+nDays_buffer, by=1)
 
   # metadata for all WRF files within timespan
   if(grepl("https", wrf.dir)) {
@@ -60,8 +61,9 @@ get_WRF <- function(wrf.dir, nDays_buffer, dateRng, out.dir, forecast=F) {
                           year_0),
            date_0=ymd(paste0(year_0, month_0, day_0)),
            date_1=ymd(paste0(year_1, month_1, day_1))) |>
-    filter(date_0 >= dateRng[1]-nDays_buffer,
-           date_1 <= dateRng[2]+nDays_buffer)
+    mutate(daysCovered=map2(date_0, date_1, ~seq(.x, .y, by=1))) |>
+    mutate(needed=map_lgl(daysCovered, ~any(.x %in% days_requested))) |>
+    filter(needed)
   wrf_dates <- unique(wrf_i$date_0)
 
   for(i in 1:length(wrf_dates)) {
