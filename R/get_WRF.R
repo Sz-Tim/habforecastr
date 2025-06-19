@@ -69,6 +69,9 @@ get_WRF <- function(wrf.dir, nDays_buffer, dateRng, out.dir, forecast=F) {
     nc_f.i <- map(wrf_i.i$fname, ~glue("{wrf_base}/{.x}")) |>
       set_names(wrf_i.i$res)
     nc.ls <- map(nc_f.i, nc_open)
+    if(nc.ls[[1]]$nvars == 0) {
+      next
+    }
     time.ls <- map(nc.ls,
                    ~tibble(Times=ncvar_get(.x, "Times")) |>
                      mutate(Time.dt=as_datetime(str_replace(Times, "_", " "))))
