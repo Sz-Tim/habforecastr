@@ -14,7 +14,8 @@ fit_covSet(
   prior_strength = 1,
   ncores = 4,
   responses = c(alert = "alert"),
-  rebalance_thresh = 0
+  rebalance_thresh = 0,
+  HB_CV = FALSE
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ fit_covSet(
 \item{responses}{A character vector specifying the response variables. Default is c(alert = "alert").}
 
 \item{rebalance_thresh}{Imbalance threshold determining whether to rebalance the training data using Synthetic Minority Oversampling TEchnique (SMOTE). If the proportion of alerts is less than the threshold, the training data will be rebalanced to the threshold. Default is 0, resulting in no rebalancing.}
+
+\item{HB_CV}{Logical: Perform cross-validation with Bayesian models?}
 }
 \value{
 None. Data, fitted objects, and logs are stored.

@@ -15,6 +15,7 @@
 #' @param ncores A numeric value specifying the number of cores to use for parallel processing. Default is 4.
 #' @param responses A character vector specifying the response variables. Default is c(alert = "alert").
 #' @param rebalance_thresh Imbalance threshold determining whether to rebalance the training data using Synthetic Minority Oversampling TEchnique (SMOTE). If the proportion of alerts is less than the threshold, the training data will be rebalanced to the threshold. Default is 0, resulting in no rebalancing.
+#' @param HB_CV Logical: Perform cross-validation with Bayesian models?
 #'
 #' @return None. Data, fitted objects, and logs are stored.
 #' @export
@@ -29,7 +30,7 @@
 #' }
 fit_covSet <- function(y_i, run_type="0_init", covSet, mod, train_prop=0.75,
                        nTuneVal=2, prior_strength=1, ncores=4,
-                       responses=c(alert="alert"), rebalance_thresh=0) {
+                       responses=c(alert="alert"), rebalance_thresh=0, HB_CV=FALSE) {
 
   # covariate set / response info
   id <- covSet$id
@@ -142,6 +143,8 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, train_prop=0.75,
     d.y$test <- map(prep.ls, ~bake(.x, obs.test))
     dPCA.y$test <- map(prepPCA.ls, ~bake(.x, obs.test))
   }
+  saveRDS(prep.ls, glue("{data.dir}/compiled/{y.i}_{id}_dy_recipePrepped.rds"))
+  saveRDS(dPCA.y, glue("{data.dir}/compiled/{y.i}_{id}_dPCAy_recipePrepped.rds"))
   saveRDS(d.y, glue("{data.dir}/compiled/{y.i}_{id}_dy_testPct-{train_prop}.rds"))
   saveRDS(dPCA.y, glue("{data.dir}/compiled/{y.i}_{id}_dPCAy_testPct-{train_prop}.rds"))
   covs <- filter_corr_covs(all_covs, d.y) |> map(~.x[! .x %in% covs_exclude])
@@ -206,9 +209,11 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, train_prop=0.75,
       fit_candidate(mod, r, form.ls, d.y$train, opts, priors, fit.dir, y.i)
       fit_candidate(mod, r, form.ls, dPCA.y$train, opts, priors, fit.dir, y.i, "_PCA")
 
-      # run CV
-      HB_run_CV("HB", folds_og_HB, cv.dir, y.i, y_i.i, r, form.ls, opts, priors, PCA=F)
-      HB_run_CV("HB", folds_PCA_HB, cv.dir, y.i, y_i.i, r, form.ls, opts, priors, PCA=T)
+      if(HB_CV) {
+        # run CV
+        HB_run_CV("HB", folds_og_HB, cv.dir, y.i, y_i.i, r, form.ls, opts, priors, PCA=F)
+        HB_run_CV("HB", folds_PCA_HB, cv.dir, y.i, y_i.i, r, form.ls, opts, priors, PCA=T)
+      }
     } else {
 
       # ML models --------------------------------------------------------------
