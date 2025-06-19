@@ -58,27 +58,8 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, train_prop=0.75,
   col_wrf <- readRDS("data/wrf_vars.rds")
 
   # All possible covariates
-  all_covs <- list(
-    spacetime=c("yday", "lat", "lon"),
-    main=c(
-      "fetch",
-      "lnNWt1", "lnNAvg1", "prAlertAvg1", "alert1A1",
-      "lnNWt2", "lnNAvg2", "prAlertAvg2", "alert2A1",
-      "lnNPrevYr", "lnNAvgPrevYr", "prAlertPrevYr", "prAlertAvgPrevYr",
-      col_cmems, col_wrf
-    ),
-    interact=c(
-      paste("UWkXfetch", grep("Dir", col_cmems, value=T), sep="X"),
-      paste("VWkXfetch", grep("Dir", col_cmems, value=T), sep="X"),
-      paste("UWkXfetch", grep("^[Precip|Shortwave|sst].*Dir", col_wrf, value=T), sep="X"),
-      paste("VWkXfetch", grep("^[Precip|Shortwave|sst].*Dir", col_wrf, value=T), sep="X")
-    ),
-    hab=c(outer(filter(y_i, type=="hab")$abbr, c("lnNAvg", "prA"), "paste0"))
-  )
-  all_covs$interact <- c(all_covs$interact,
-                         paste("lnNWt1", c(all_covs$main[-2]), sep="X"))
-  all_covs$hab <- c(all_covs$hab,
-                    paste("lnNWt1", c(all_covs$hab), sep="X"))
+  all_covs <- make_all_covs(col_cmems, col_wrf, y_i)
+
   # Randomly select covariate subset
   set.seed(covSet$seed)
   if(grepl("fish", y_i.i$type)) {
@@ -93,17 +74,7 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, train_prop=0.75,
   }
 
   # testing/training splits
-  obs.ls <- map_dfr(dirf(data.dir, "data_.*_all.rds"), readRDS) |>
-    filter(y==y.i) |>
-    select(all_of(col_metadata), all_of(col_resp),
-           "alert1", "alert2", any_of(unname(unlist(all_covs)))) |>
-    mutate(across(starts_with("alert"), ~factor(.x)),
-           across(starts_with("tl"), ~factor(.x, ordered=T))) |>
-    group_by(obsid) |>
-    slice_head(n=1) |>
-    ungroup() |>
-    select(where(~any(!is.na(.x)))) |>
-    drop_na()
+  obs.ls <- load_dataset_y(data.dir, y.i, col_metadata, col_resp, all_covs)
 
   set.seed(1003)
   if(train_prop < 1) {
@@ -144,7 +115,7 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, train_prop=0.75,
     dPCA.y$test <- map(prepPCA.ls, ~bake(.x, obs.test))
   }
   saveRDS(prep.ls, glue("{data.dir}/compiled/{y.i}_{id}_dy_recipePrepped.rds"))
-  saveRDS(dPCA.y, glue("{data.dir}/compiled/{y.i}_{id}_dPCAy_recipePrepped.rds"))
+  saveRDS(prepPCA.ls, glue("{data.dir}/compiled/{y.i}_{id}_dPCAy_recipePrepped.rds"))
   saveRDS(d.y, glue("{data.dir}/compiled/{y.i}_{id}_dy_testPct-{train_prop}.rds"))
   saveRDS(dPCA.y, glue("{data.dir}/compiled/{y.i}_{id}_dPCAy_testPct-{train_prop}.rds"))
   covs <- filter_corr_covs(all_covs, d.y) |> map(~.x[! .x %in% covs_exclude])

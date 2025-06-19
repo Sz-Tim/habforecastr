@@ -1,4 +1,73 @@
 
+
+
+
+#' Make all covariates
+#'
+#' @param col_cmems
+#' @param col_wrf
+#' @param y_i
+#'
+#' @return list with `spacetime`,`main`, `interact`, and `hab`, each containing a vector of covariate names
+#' @export
+#'
+#' @examples
+make_all_covs <- function(col_cmems, col_wrf, y_i) {
+  all_covs <- list(
+    spacetime=c("yday", "lat", "lon"),
+    main=c(
+      "fetch",
+      "lnNWt1", "lnNAvg1", "prAlertAvg1", "alert1A1",
+      "lnNWt2", "lnNAvg2", "prAlertAvg2", "alert2A1",
+      "lnNPrevYr", "lnNAvgPrevYr", "prAlertPrevYr", "prAlertAvgPrevYr",
+      col_cmems, col_wrf
+    ),
+    interact=c(
+      paste("UWkXfetch", grep("Dir", col_cmems, value=T), sep="X"),
+      paste("VWkXfetch", grep("Dir", col_cmems, value=T), sep="X"),
+      paste("UWkXfetch", grep("^[Precip|Shortwave|sst].*Dir", col_wrf, value=T), sep="X"),
+      paste("VWkXfetch", grep("^[Precip|Shortwave|sst].*Dir", col_wrf, value=T), sep="X")
+    ),
+    hab=c(outer(filter(y_i, type=="hab")$abbr, c("lnNAvg", "prA"), "paste0"))
+  )
+  all_covs$interact <- c(all_covs$interact,
+                         paste("lnNWt1", c(all_covs$main[-2]), sep="X"))
+  all_covs$hab <- c(all_covs$hab,
+                    paste("lnNWt1", c(all_covs$hab), sep="X"))
+  return(all_covs)
+}
+
+
+
+
+
+#' Load dataframe for specified target
+#'
+#' @param data.dir
+#' @param y.i
+#' @param col_metadata
+#' @param col_resp
+#' @param all_covs
+#'
+#' @return
+#' @export
+#'
+#' @examples
+load_dataset_y <- function(data.dir, y.i, col_metadata, col_resp, all_covs) {
+  map_dfr(dirf(data.dir, "data_.*_all.rds"), readRDS) |>
+    filter(y==y.i) |>
+    select(all_of(col_metadata), all_of(col_resp),
+           "alert1", "alert2", any_of(unname(unlist(all_covs)))) |>
+    mutate(across(starts_with("alert"), ~factor(.x)),
+           across(starts_with("tl"), ~factor(.x, ordered=T))) |>
+    group_by(obsid) |>
+    slice_head(n=1) |>
+    ungroup() |>
+    select(where(~any(!is.na(.x)))) |>
+    drop_na()
+}
+
+
 #' Create recipe and prepare using training data
 #'
 #' This function creates a recipe for data preprocessing and prepares it using the training data.
