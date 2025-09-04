@@ -20,15 +20,7 @@ download_site_info <- function(url_sites, dateStart) {
     url() |>
     readLines(warn=F) |>
     fromJSON() |> as_tibble() |>
-    filter(east < 7e5 &
-             north < 125e4 &
-             !(east==0 & north==0) &
-             sin != "-99" &
-             !is.na(fromdate) & !is.na(todate) &
-             fromdate != todate) |>
     mutate(fromdate=lubridate::date(fromdate), todate=lubridate::date(todate)) |>
-    arrange(sin, fromdate) |>
-    select(sin, site, area, farm_species, east, north, fromdate, todate) |>
     arrange(sin, fromdate)
 }
 
@@ -62,7 +54,7 @@ read_and_clean_sites <- function(url_sites, dateStart) {
     mutate(date=list(seq(fromdate, todate, by=1))) |>
     ungroup() |>
     arrange(sin, fromdate) |>
-    select(sin, east, north, date) |>
+    select(any_of(c("sin", "site", "area", "farm_species", "east", "north", "date"))) |>
     unnest(date) |>
     arrange(sin, date) |>
     group_by(sin, date) |>
@@ -94,14 +86,14 @@ read_and_clean_fsa <- function(url_fsa, hab_i, sites, dateStart="2016-01-01") {
            date=lubridate::date(datetime_collected)) |>
     mutate(across(any_of(hab_i$full), ~na_if(.x, -99))) |>
     group_by(sin) |> mutate(N=n()) |> ungroup() |> filter(N > 2) |>
-    select(oid, sin, date, easting, northing, all_of(hab_i$full)) |>
-    left_join(sites, by=c("sin", "date")) |>
+    select(oid, sin, site, area, farm_species, date, easting, northing, all_of(hab_i$full)) |>
+    left_join(sites |> select(sin, east, north, date), by=c("sin", "date")) |>
     mutate(east=if_else(is.na(east), easting, east),
            north=if_else(is.na(north), northing, north)) |>
     rename(obsid=oid) |>
     group_by(sin) |> mutate(lon=median(east), lat=median(north)) |> ungroup() |>
     rename(all_of(setNames(hab_i$full, hab_i$abbr))) |>
-    select(obsid, lon, lat, sin, date, all_of(hab_i$abbr)) |>
+    select(obsid, lon, lat, sin, site, area, farm_species, date, all_of(hab_i$abbr)) |>
     arrange(sin, date)
 }
 
@@ -130,15 +122,15 @@ read_and_clean_cefas <- function(url_cefas, tox_i, sites, dateStart="2016-01-01"
            across(any_of(tox_i$full), ~if_else(.x < 0, 0, .x))) |>
     group_by(sin, date) |> slice_head(n=1) |> ungroup() |>
     group_by(sin) |> mutate(N=n()) |> ungroup() |> filter(N > 2) |>
-    select(oid, sin, date, easting, northing, all_of(tox_i$full)) |>
-    left_join(sites, by=c("sin", "date")) |>
+    select(oid, sin, site, area, farm_species, date, easting, northing, all_of(tox_i$full)) |>
+    left_join(sites |> select(sin, east, north, date), by=c("sin", "date")) |>
     mutate(east=if_else(is.na(east), easting, east),
            north=if_else(is.na(north), northing, north)) |>
     rename(obsid=oid) |>
     group_by(sin) |> mutate(lon=median(east), lat=median(north)) |> ungroup() |>
     filter(lat > 500000) |>
     rename(all_of(setNames(tox_i$full, tox_i$abbr))) |>
-    select(obsid, lon, lat, sin, date, all_of(tox_i$abbr)) |>
+    select(obsid, lon, lat, sin, site, area, farm_species, date, all_of(tox_i$abbr)) |>
     arrange(sin, date)
 }
 
@@ -175,7 +167,7 @@ read_and_clean_fish <- function(url_mowi, url_ssf, fish_i, sites, dateStart="201
     select(oid, sin, date, easting, northing, any_of(fish_i$full)) |>
     mutate(easting=if_else(easting==0 & northing==0, NA_real_, easting),
            northing=if_else(easting==0 & northing==0, NA_real_, northing)) |>
-    left_join(sites, by=c("sin", "date")) |>
+    left_join(sites |> select(sin, east, north, date), by=c("sin", "date")) |>
     mutate(east=if_else(is.na(east), easting, east),
            north=if_else(is.na(north), northing, north)) |>
     rename(obsid=oid) |>
@@ -210,7 +202,7 @@ read_and_clean_monitoring_data <- function(i, urls, targ_i, sites, dateStart) {
     dat.df <- read_and_clean_fsa(urls$fsa, targ_i$hab, sites, dateStart)
   } else if(i == "tox") {
     dat.df <- read_and_clean_cefas(urls$cefas, targ_i$tox, sites, dateStart)
-  } else if(i == "habfish") {
+  } else if(i == "fish") {
     dat.df <- read_and_clean_fish(urls$mowi, urls$ssf, targ_i$fish, sites, dateStart)
   }
   return(dat.df)
