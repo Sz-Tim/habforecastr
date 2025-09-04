@@ -62,7 +62,11 @@ compute_thresholds <- function(L.df, prMin=0, prMax=1, prSteps=0.1, byPrevAlert=
     col_to_drop <- c(col_to_drop, "prevAlert")
   }
   if(cores > 1) {
-    plan(multisession, workers=cores)
+    if(.Platform$OS.type=="unix") {
+      plan(multicore, workers=cores)
+    } else {
+      plan(multisession, workers=cores)
+    }
   } else {
     plan(sequential)
   }
