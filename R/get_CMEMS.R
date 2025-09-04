@@ -34,7 +34,7 @@ get_CMEMS <- function(userid, pw, i.df, bbox, nDays_buffer, dateRng, out.dir,
     }
     save(list=ls(all.names=TRUE), file="temp/get_CMEMS.RData")
     system2("bash", paste0(getwd(), "/code/00_getCMEMS.sh"))
-    file.remove("temp/get_CMEMS.RData")
+    dir("temp", full.names=T) |> file.remove()
     return("Finished running /code/getCMEMS.sh")
   }
 
