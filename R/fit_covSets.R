@@ -79,6 +79,7 @@ fit_covSet <- function(y_i, run_type="0_init", covSet, mod, train_prop=0.75,
   set.seed(1003)
   if(train_prop < 1) {
     if(grepl("fish", y_i.i$type)) {
+      obs.ls <- obs.ls |> arrange(date, siteid)
       obs.split <- initial_time_split(obs.ls, prop=train_prop)
     } else {
       obs.split <- group_initial_split(obs.ls, group=year, prop=train_prop)
