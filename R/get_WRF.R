@@ -61,6 +61,7 @@ get_WRF <- function(wrf.dir, nDays_buffer, dateRng, out.dir, forecast=F) {
                           year_0),
            date_0=ymd(paste0(year_0, month_0, day_0)),
            date_1=ymd(paste0(year_1, month_1, day_1))) |>
+    filter(!is.na(date_0) & !is.na(date_1)) |>
     mutate(daysCovered=map2(date_0, date_1, ~seq(.x, .y, by=1))) |>
     mutate(needed=map_lgl(daysCovered, ~any(.x %in% days_requested))) |>
     filter(needed)
