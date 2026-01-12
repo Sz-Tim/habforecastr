@@ -49,12 +49,12 @@ fit_candidate <- function(mod, resp, form.ls, d.ls, opts, tunes, out.dir, y, suf
                       RF=rand_forest(trees=tune(),
                                      min_n=tune()) |>
                         set_engine("randomForest") |> set_mode("classification"),
-                      NN=mlp(hidden_units=tune(),
-                             penalty=tune(),
-                             epochs=tune()) |>
+                      NN=bag_mlp(hidden_units=tune(),
+                                 penalty=tune(),
+                                 epochs=tune()) |>
                         set_engine("nnet", maxNWts=1e4) |> set_mode("classification"),
-                      MARS=mars(num_terms=tune(),
-                                prod_degree=tune()) |>
+                      MARS=bag_mars(num_terms=tune(),
+                                    prod_degree=tune()) |>
                         set_engine("earth") |> set_mode("classification"),
                       Boost=boost_tree(trees=tune(),
                                        tree_depth=tune(),
