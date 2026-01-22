@@ -111,10 +111,12 @@ fit_candidate <- function(mod, resp, form.ls, d.ls, opts, tunes, out.dir, y, suf
       finalize_workflow(best) |>
       fit(data=d.ls[[resp]] |>
             select(-obsid, -y, -date, -year, -yday, -siteid, -lon, -lat))
-    out |>
-      extract_fit_engine() |>
-      vip::vi(scale=T) |>
-      saveRDS(glue("{out.dir}/vi/{fit_ID}_vi.rds"))
+    try({
+      out |>
+        extract_fit_engine() |>
+        vip::vi(scale=T) |>
+        saveRDS(glue("{out.dir}/vi/{fit_ID}_vi.rds"))
+    })
     out <- out |>
       butcher()
   }
