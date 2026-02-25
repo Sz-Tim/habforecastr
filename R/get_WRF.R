@@ -243,7 +243,7 @@ subset_WRF <- function(domain, wrf.out, v2_start=NULL, refreshStart=NULL) {
         mutate(version=ifelse(is.null(v2_start), v_i, 1 + (date_i >= v2_start)))
     }
   }
-  wrf.ls <- do.call('rbind', wrf.ls)
+  wrf.ls <- bind_rows(wrf.ls)
   return(wrf.ls)
 }
 
