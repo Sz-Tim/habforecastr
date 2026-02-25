@@ -11,6 +11,7 @@
 #' @param dateRng A vector of two dates specifying the date range for the data.
 #' @param out.dir A character string specifying the output directory for saving the downloaded data.
 #' @param toolbox A logical value indicating whether to use a toolbox script for downloading. Default is TRUE.
+#' @param init_LU Dataframe with cmems_id, lon, and lat; if NULL, will be created in out.dir
 #'
 #' @return A message indicating the completion of the download process.
 #' @export
@@ -27,7 +28,7 @@
 #' get_CMEMS(userid, pw, i.df, bbox, nDays_buffer, dateRng, out.dir)
 #' }
 get_CMEMS <- function(userid, pw, i.df, bbox, nDays_buffer, dateRng, out.dir,
-                      toolbox=TRUE) {
+                      toolbox=TRUE, init_LU=NULL) {
   if(toolbox) {
     if(length(dir("temp/")) > 0) {
       file.remove(dir("temp/", full.names=T))

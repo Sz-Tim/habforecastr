@@ -12,7 +12,8 @@ get_CMEMS(
   nDays_buffer,
   dateRng,
   out.dir,
-  toolbox = TRUE
+  toolbox = TRUE,
+  init_LU = NULL
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ get_CMEMS(
 \item{out.dir}{A character string specifying the output directory for saving the downloaded data.}
 
 \item{toolbox}{A logical value indicating whether to use a toolbox script for downloading. Default is TRUE.}
+
+\item{init_LU}{Dataframe with cmems_id, lon, and lat; if NULL, will be created in out.dir}
 }
 \value{
 A message indicating the completion of the download process.
