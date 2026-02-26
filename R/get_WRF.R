@@ -226,10 +226,12 @@ subset_WRF <- function(domain, wrf.out, v2_start=NULL, refreshStart=NULL) {
            end=lead(start, default=ymd("3000-01-01")))
   v_dateRng$start[1] <- "2013-01-01"
 
-  iwalk(domain.ls,
-        ~.x |> mutate(version=.y) |>
-          select(-row, -col) |>
-          saveRDS(glue("{wrf.out}/domain_{domain}_{.y}.rds")))
+  if(is.null(refreshStart)) {
+    iwalk(domain.ls,
+          ~.x |> mutate(version=.y) |>
+            select(-row, -col) |>
+            saveRDS(glue("{wrf.out}/domain_{domain}_{.y}.rds")))
+  }
 
   wrf.ls <- vector("list", length(f.wrf))
   for(i in seq_along(f.wrf)) {
@@ -258,6 +260,7 @@ subset_WRF <- function(domain, wrf.out, v2_start=NULL, refreshStart=NULL) {
 #' @param wrf.out A character string specifying the output directory where WRF data is stored.
 #' @param v2_start A Date object specifying the start date for version 2 of the data. Default is `ymd("2019-04-01")`.
 #' @param refreshStart A Date object specifying the start date for refreshing the data. Default is NULL.
+#' @param ncores Number of cores for parallel processing
 #'
 #' @return A data frame containing the aggregated WRF data with transformations applied.
 #' @export
@@ -268,23 +271,57 @@ subset_WRF <- function(domain, wrf.out, v2_start=NULL, refreshStart=NULL) {
 #' wrf.out <- "path/to/wrf_output"
 #' result <- aggregate_WRF(wrf.out)
 #' }
-aggregate_WRF <- function(wrf.out, v2_start=ymd("2019-04-01"), refreshStart=NULL) {
+aggregate_WRF <- function(wrf.out, v2_start=ymd("2019-04-01"), refreshStart=NULL, ncores=5) {
   d01 <- subset_WRF("d01", wrf.out, v2_start=v2_start, refreshStart)
   d02 <- subset_WRF("d02", wrf.out, v2_start=v2_start, refreshStart)
   d03 <- subset_WRF("d03", wrf.out, v2_start=v2_start, refreshStart)
-  wrf.df <-  bind_rows(d01, d02, d03) |>
+  temp.ls <- bind_rows(d01, d02, d03) |>
     filter(!is.na(date)) |>
     arrange(date, res, i) |>
     group_by(date) |>
     mutate(wrf_id=row_number()) |>
-    ungroup() |>
-    mutate(across(where(is.numeric), ~if_else(.x > 1e30, NA, .x))) |>
-    mutate(yday=yday(date)) |>
-    group_by(wrf_id, version, yday) |>
-    mutate(across(where(is.numeric), zoo::na.aggregate)) |>
-    ungroup() |>
-    mutate(Shortwave=log1p(Shortwave),
-           Precip=log1p(pmax(Precip, 0)*3600*24*1000), # m/s to mm/day
-           UV=log1p(UV))
+    group_by(wrf_id, version) |>
+    group_split()
+
+  if(.Platform$OS.type=="unix") {
+    plan(multicore, workers=ncores)
+  } else {
+    plan(multisession, workers=ncores)
+  }
+
+  # TODO: Would be better to spatially interpolate each variable
+  # As written, this is only intended to interpolate initial data acquisition
+  # rather than during operational usage.
+  # for each column (U, V, UV, Shortwave, Precip, sst):
+  # interp::interp(x=wrf_test$x, y=wrf_test$y, z=wrf_test$Shortwave) |>
+  #   interp::interp2xyz() |>
+  #   as_tibble()
+  # Then bind columns
+
+  if(is.null(refreshStart)) {
+    wrf.df <- furrr:::future_map_dfr(
+      temp.ls,
+      ~.x |>
+        mutate(across(where(is.numeric), ~if_else(.x > 1e30, NA, .x)),
+               yday=yday(date)) |>
+        group_by(yday) |>
+        mutate(across(where(is.numeric), zoo::na.aggregate)) |>
+        ungroup()) |>
+      mutate(Shortwave=log1p(Shortwave),
+             Precip=log1p(pmax(Precip, 0)*3600*24*1000), # m/s to mm/day
+             UV=log1p(UV))
+  } else{
+    wrf.df <- furrr:::future_map_dfr(
+      temp.ls,
+      ~.x |>
+        mutate(across(where(is.numeric), ~if_else(.x > 1e30, NA, .x)),
+               yday=yday(date))) |>
+      mutate(Shortwave=log1p(Shortwave),
+             Precip=log1p(pmax(Precip, 0)*3600*24*1000), # m/s to mm/day
+             UV=log1p(UV))
+  }
+
+  plan(sequential)
+
   return(wrf.df)
 }

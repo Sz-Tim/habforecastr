@@ -4,7 +4,12 @@
 \alias{aggregate_WRF}
 \title{Aggregate WRF Data}
 \usage{
-aggregate_WRF(wrf.out, v2_start = ymd("2019-04-01"), refreshStart = NULL)
+aggregate_WRF(
+  wrf.out,
+  v2_start = ymd("2019-04-01"),
+  refreshStart = NULL,
+  ncores = 5
+)
 }
 \arguments{
 \item{wrf.out}{A character string specifying the output directory where WRF data is stored.}
@@ -12,6 +17,8 @@ aggregate_WRF(wrf.out, v2_start = ymd("2019-04-01"), refreshStart = NULL)
 \item{v2_start}{A Date object specifying the start date for version 2 of the data. Default is `ymd("2019-04-01")`.}
 
 \item{refreshStart}{A Date object specifying the start date for refreshing the data. Default is NULL.}
+
+\item{ncores}{Number of cores for parallel processing}
 }
 \value{
 A data frame containing the aggregated WRF data with transformations applied.
