@@ -9,6 +9,7 @@ calc_y_features(
   y_i,
   tl_i,
   dist.df = NULL,
+  newObsStart = "1900-01-01",
   forecastStart = "3000-01-01"
 )
 }
@@ -20,6 +21,8 @@ calc_y_features(
 \item{tl_i}{A data frame containing traffic light (`tl`), alert (`A`), abbreviation (`abbr`), and minimum threshold (`min_ge`) values.}
 
 \item{dist.df}{A data frame containing distance information between sites. Default is `NULL`.}
+
+\item{newObsStart}{A character string specifying the start date for new observations. Default is `"1900-01-01"`. Neighborhood and previous year summaries are only calculated for observations starting at this date.}
 
 \item{forecastStart}{A character string specifying the start date for forecasting. Default is `"3000-01-01"`.}
 

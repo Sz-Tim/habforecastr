@@ -42,18 +42,22 @@ load_datasets <- function(sub.dir, target, ydayAvg.dir) {
     wrf.buf=readRDS(glue("data/{ydayAvg.dir}/ydayAvg_wrf_siteBufferNSEW_{target}.rds")) |>
       pivot_wider(names_from="quadrant", values_from=-(1:3), names_sep="Dir")
   )
-  d.ls$compiled <- d.ls$site |> select(-sin) |>
-    right_join(d.ls$obs, by="siteid", multiple="all") |>
-    left_join(d.ls$cmems.pt |> select(-ends_with("Dt")), by=c("cmems_id", "date")) |>
+
+  d.ls$compiled <- d.ls$site |>
+    right_join(d.ls$obs,
+               by=join_by(siteid, sin, site, area, farm_species), multiple="all") |>
+    left_join(d.ls$cmems.pt |> select(-ends_with("Dt")),
+              by=join_by(cmems_id, date)) |>
     left_join(d.ls$cmems.buf |> select(-ends_with("Dt")) |>
                 pivot_wider(names_from="quadrant", values_from=-(1:3), names_sep="Dir"),
-              by=c("siteid", "date")) |>
+              by=join_by(siteid, date)) |>
     mutate(wrf_id=if_else(date < "2019-04-01", wrf_id.1, wrf_id.2)) |>
     select(-wrf_id.1, -wrf_id.2, -version) |>
-    left_join(d.ls$wrf.pt |> select(-version, -ends_with("Dt")), by=c("wrf_id", "date")) |>
+    left_join(d.ls$wrf.pt |> select(-version, -ends_with("Dt")),
+              by=join_by(wrf_id, date)) |>
     left_join(d.ls$wrf.buf |> select(-ends_with("Dt")) |>
                 pivot_wider(names_from="quadrant", values_from=-(1:3), names_sep="Dir"),
-              by=c("siteid", "date")) |>
+              by=join_by(siteid, date)) |>
     mutate(year=year(date),
            yday=yday(date))
   for(i in seq_along(yday_env)) {
@@ -67,16 +71,17 @@ load_datasets <- function(sub.dir, target, ydayAvg.dir) {
       na_rows <- which(is.na(d.ls$compiled[[j]]))
       if(length(na_rows > 0)) {
         d_meta <- d.ls$compiled[na_rows, c("siteid", "cmems_id", "wrf_id", "yday")]
-        d.ls$compiled[[j]][na_rows] <- left_join(d_meta |>
-                                                   select(all_of(env_id_col)),
-                                                 yday_env[[i]] |>
-                                                   select(all_of(c(env_id_col, j))))[[j]]
+        d.ls$compiled[[j]][na_rows] <- left_join(
+          d_meta |> select(all_of(env_id_col)),
+          yday_env[[i]] |> select(all_of(c(env_id_col, j))),
+          by=join_by(!!!env_id_col)
+        )[[j]]
       }
     }
   }
   if(target=="tox") {
     d.ls$compiled <- d.ls$compiled |>
-      left_join(d.ls$habAvg |> select(-date, -siteid), by="obsid")
+      left_join(d.ls$habAvg |> select(-date, -siteid), by=join_by(obsid))
   }
 
   return(d.ls)

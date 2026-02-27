@@ -119,6 +119,7 @@ get_trafficLights <- function(y.df, N, tl_i) {
 #' @param tl_i A data frame containing traffic light (`tl`), alert (`A`), abbreviation (`abbr`), and minimum threshold (`min_ge`) values.
 #' @param site.100km A data frame with site information within a 100 km radius.
 #' @param dist.df A data frame containing distance information between sites. Default is `NULL`.
+#' @param newObsStart A character string specifying the start date for new observations. Default is `"1900-01-01"`. Neighborhood and previous year summaries are only calculated for observations starting at this date.
 #' @param forecastStart A character string specifying the start date for forecasting. Default is `"3000-01-01"`.
 #'
 #' @return A data frame with calculated autoregressive terms and additional features for each observation.
@@ -132,7 +133,8 @@ get_trafficLights <- function(y.df, N, tl_i) {
 #' dist.df <- data.frame(origins = rep(1:3, each = 3), dest_c = list(1:3, 1:3, 1:3))
 #' result <- calc_y_features(yRaw.df, y_i, tl_i, dist.df)
 #' }
-calc_y_features <- function(yRaw.df, y_i, tl_i, dist.df=NULL, forecastStart="3000-01-01") {
+calc_y_features <- function(yRaw.df, y_i, tl_i, dist.df=NULL,
+                            newObsStart="1900-01-01", forecastStart="3000-01-01") {
   y.ls <- yRaw.df |>
     group_by(siteid, date) |>
     slice_head(n=1) |>
@@ -170,6 +172,9 @@ calc_y_features <- function(yRaw.df, y_i, tl_i, dist.df=NULL, forecastStart="300
     for(j in 1:nrow(y.ls[[i]])) {
       site_j <- y.df_i$siteid[j]
       date_j <- y.df_i$date[j]
+      if(date_j < newObsStart) {
+        next
+      }
       yr_j <- year(date_j)
       wk.df <- y.df_i |>
         filter(siteid %in% dist.df$dest_c[dist.df$origins==site_j][[1]] &
@@ -240,8 +245,7 @@ summarise_hab_states <- function(site_tox.sf, site_hab.sf, tox.obs, hab.df) {
     hab_sites <- filter(hab_ids, siteid==tox.obs$siteid[i])$hab_id[[1]]
     habSums[[i]] <- hab.df |>
       filter(hab_id %in% hab_sites &
-               date <= tox.obs$date[i] - 7*1 &
-               date >= tox.obs$date[i] - 7*5) |>
+               between(date, tox.obs$date[i] - 7*5, tox.obs$date[i])) |>
       summarise(across(all_of(hab_y_names), ~mean(.x, na.rm=T)))
   }
   out.df <- tox.obs |> bind_cols(do.call('rbind', habSums))
