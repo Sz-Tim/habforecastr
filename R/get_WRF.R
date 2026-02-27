@@ -284,9 +284,9 @@ aggregate_WRF <- function(wrf.out, v2_start=ymd("2019-04-01"), refreshStart=NULL
     group_split()
 
   if(.Platform$OS.type=="unix") {
-    plan(multicore, workers=ncores)
+    future::plan(multicore, workers=ncores)
   } else {
-    plan(multisession, workers=ncores)
+    future::plan(multisession, workers=ncores)
   }
 
   # TODO: Would be better to spatially interpolate each variable
@@ -321,7 +321,7 @@ aggregate_WRF <- function(wrf.out, v2_start=ymd("2019-04-01"), refreshStart=NULL
              UV=log1p(UV))
   }
 
-  plan(sequential)
+  future::plan(sequential)
 
   return(wrf.df)
 }
