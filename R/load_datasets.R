@@ -44,8 +44,8 @@ load_datasets <- function(sub.dir, target, ydayAvg.dir) {
   )
 
   d.ls$compiled <- d.ls$site |>
-    right_join(d.ls$obs,
-               by=join_by(siteid, sin, site, area, farm_species), multiple="all") |>
+    right_join(d.ls$obs |> select(-site, -area, -farm_species),
+               by=join_by(siteid, sin), multiple="all") |>
     left_join(d.ls$cmems.pt |> select(-ends_with("Dt")),
               by=join_by(cmems_id, date)) |>
     left_join(d.ls$cmems.buf |> select(-ends_with("Dt")) |>
