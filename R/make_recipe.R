@@ -64,7 +64,7 @@ load_dataset_y <- function(data.dir, y.i, col_metadata, col_resp, all_covs) {
     slice_head(n=1) |>
     ungroup() |>
     select(where(~any(!is.na(.x)))) |>
-    drop_na()
+    drop_na(any_of(unlist(all_covs, use.names=F)))
 }
 
 
