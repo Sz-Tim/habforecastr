@@ -22,6 +22,16 @@ get_metrics <- function(dat) {
          mcc=mcc(dat, alert, pred)$.estimate)
 }
 
+get_F1 <- function(dat) {
+  tibble(F1=f_meas(dat, alert, pred, event_level="second")$.estimate,
+         precision=precision(dat, alert, pred, event_level="second")$.estimate,
+         recall=recall(dat, alert, pred, event_level="second")$.estimate)
+}
+
+get_MCC <- function(dat) {
+  tibble(mcc=mcc(dat, alert, pred)$.estimate)
+}
+
 
 
 
@@ -81,6 +91,44 @@ compute_thresholds <- function(L.df, prMin=0, prMax=1, prSteps=0.1, byPrevAlert=
   return(metric.df)
 }
 
+
+compute_thresholds_F1 <- function(L.df, prMin=0, prMax=1, prSteps=0.1, byPrevAlert=F) {
+  library(tidyverse); library(yardstick)
+  pred.df <- map_dfr(seq(prMin, prMax, by=prSteps),
+                     ~L.df |> mutate(thresh=.x)) |>
+    mutate(pred=if_else(prA1 < thresh, "A0", "A1") |> factor(levels=c("A0", "A1")))
+  col_to_drop <- c("obsid", "siteid", "date", "prA1")
+  if(!byPrevAlert) {
+    col_to_drop <- c(col_to_drop, "prevAlert")
+  }
+  metric.df <- pred.df |>
+    select(-all_of(col_to_drop)) |>
+    nest(dat=c(alert, pred)) |>
+    ungroup() |>
+    mutate(metrics=map(dat, get_F1)) |>
+    select(-dat) |>
+    unnest(metrics)
+  return(metric.df)
+}
+
+compute_thresholds_MCC <- function(L.df, prMin=0, prMax=1, prSteps=0.1, byPrevAlert=F) {
+  library(tidyverse); library(yardstick)
+  pred.df <- map_dfr(seq(prMin, prMax, by=prSteps),
+                     ~L.df |> mutate(thresh=.x)) |>
+    mutate(pred=if_else(prA1 < thresh, "A0", "A1") |> factor(levels=c("A0", "A1")))
+  col_to_drop <- c("obsid", "siteid", "date", "prA1")
+  if(!byPrevAlert) {
+    col_to_drop <- c(col_to_drop, "prevAlert")
+  }
+  metric.df <- pred.df |>
+    select(-all_of(col_to_drop)) |>
+    nest(dat=c(alert, pred)) |>
+    ungroup() |>
+    mutate(metrics=map(dat, get_MCC)) |>
+    select(-dat) |>
+    unnest(metrics)
+  return(metric.df)
+}
 
 
 
