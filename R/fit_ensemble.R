@@ -51,37 +51,45 @@ fit_ensemble <- function(out.ls, wt.ls, resp, y_i.i, method="wtmean", out.path=N
         update_role(y, obsid, siteid, date, year, new_role="ID")
 
       if(method=="GLM_fit") {
-        size <- ifelse(is.null(opt), 1e3, opt)
-        GLM_spec <- logistic_reg(penalty=tune(), mixture=0) |>
-          set_engine("glmnet", lower.limits=0) |> set_mode("classification")
+        if(file.exists(glue("{out.path}/{y_i.i$abbr}_EnsGLM.rds"))) {
+          GLM_out <- readRDS(glue("{out.path}/{y_i.i$abbr}_EnsGLM.rds"))
+        } else {
+          size <- ifelse(is.null(opt), 1e3, opt)
+          GLM_spec <- logistic_reg(penalty=tune(), mixture=0) |>
+            set_engine("glmnet", lower.limits=0) |> set_mode("classification")
 
-        GLM_wf <- workflow() |>
-          add_model(GLM_spec) |>
-          add_recipe(ens_rec)
-        GLM_tune <- GLM_wf |>
-          tune_grid(resamples=folds,
-                    grid=grid_latin_hypercube(extract_parameter_set_dials(GLM_spec),
-                                              size=size),
-                    metrics=metric_set(avg_prec2))
-        GLM_out <- GLM_wf |>
-          finalize_workflow(select_best(GLM_tune, metric="avg_prec2")) |>
-          fit(wt.ls[[resp]]) |>
-          butcher()
-        saveRDS(GLM_out, glue("{out.path}/{y_i.i$abbr}_EnsGLM.rds"))
+          GLM_wf <- workflow() |>
+            add_model(GLM_spec) |>
+            add_recipe(ens_rec)
+          GLM_tune <- GLM_wf |>
+            tune_grid(resamples=folds,
+                      grid=grid_latin_hypercube(extract_parameter_set_dials(GLM_spec),
+                                                size=size),
+                      metrics=metric_set(avg_prec2))
+          GLM_out <- GLM_wf |>
+            finalize_workflow(select_best(GLM_tune, metric="avg_prec2")) |>
+            fit(wt.ls[[resp]]) |>
+            butcher()
+          saveRDS(GLM_out, glue("{out.path}/{y_i.i$abbr}_EnsGLM.rds"))
+        }
 
-        GLM_wf2 <- workflow() |>
-          add_model(GLM_spec) |>
-          add_recipe(ens_rec2)
-        GLM_tune2 <- GLM_wf2 |>
-          tune_grid(resamples=folds,
-                    grid=grid_latin_hypercube(extract_parameter_set_dials(GLM_spec),
-                                              size=size),
-                    metrics=metric_set(avg_prec2))
-        GLM_out2 <- GLM_wf2 |>
-          finalize_workflow(select_best(GLM_tune2, metric="avg_prec2")) |>
-          fit(wt.ls[[resp]]) |>
-          butcher()
-        saveRDS(GLM_out2, glue("{out.path}/{y_i.i$abbr}_EnsGLM2.rds"))
+        if(file.exists(glue("{out.path}/{y_i.i$abbr}_EnsGLM2.rds"))) {
+          GLM_out2 <- readRDS(glue("{out.path}/{y_i.i$abbr}_EnsGLM2.rds"))
+        } else {
+          GLM_wf2 <- workflow() |>
+            add_model(GLM_spec) |>
+            add_recipe(ens_rec2)
+          GLM_tune2 <- GLM_wf2 |>
+            tune_grid(resamples=folds,
+                      grid=grid_latin_hypercube(extract_parameter_set_dials(GLM_spec),
+                                                size=size),
+                      metrics=metric_set(avg_prec2))
+          GLM_out2 <- GLM_wf2 |>
+            finalize_workflow(select_best(GLM_tune2, metric="avg_prec2")) |>
+            fit(wt.ls[[resp]]) |>
+            butcher()
+          saveRDS(GLM_out2, glue("{out.path}/{y_i.i$abbr}_EnsGLM2.rds"))
+        }
       }
 
       if(method=="RF_fit") {
@@ -141,8 +149,6 @@ fit_ensemble <- function(out.ls, wt.ls, resp, y_i.i, method="wtmean", out.path=N
       }
     }
     if(grepl("GLM", method)) {
-      GLM_out <- readRDS(glue("{out.path}/{y_i.i$abbr}_EnsGLM.rds"))
-      GLM_out2 <- readRDS(glue("{out.path}/{y_i.i$abbr}_EnsGLM2.rds"))
       out <- out.ls[[resp]] %>%
         mutate(ensGLM_alert_A1=predict(GLM_out, new_data=., type="prob")[[2]],
                ensGLM2_alert_A1=predict(GLM_out2, new_data=., type="prob")[[2]]) |>
