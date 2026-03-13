@@ -35,6 +35,10 @@ make_forecast_data <- function(y_i, covSet, data.dir, responses=c(alert="alert")
 
   # Load full forecast dataset
   obs.ls <- load_dataset_y(data.dir, y.i, col_metadata, col_resp, all_covs)
+  if(!all(col_resp %in% names(obs.ls))) {
+    missing_cols <- which(! col_resp %in% names(obs.ls))
+    obs.ls[col_resp[missing_cols]] <- NA
+  }
 
   # Load recipes
   prep.ls <- readRDS(glue("data/0_init/compiled/{y.i}_{id}_dy_recipePrepped.rds"))
